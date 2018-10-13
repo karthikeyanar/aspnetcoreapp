@@ -64,33 +64,67 @@ namespace aspnetcoreapp.Helpers {
     public class Helper {
         public static string ConnectionString {
             get {
-                return ConfigHelper.AppSetting("ConnectionStrings","DefaultConnection");
+                return ConfigHelper.AppSetting ("ConnectionStrings", "DefaultConnection");
             }
         }
         public static string RootPath {
             get {
-                return ConfigHelper.AppSetting("AppSettings","RootPath");
+                return ConfigHelper.AppSetting ("AppSettings", "RootPath");
             }
         }
-        public static string ReplaceOrderBy(string sql, string orderby) {
+        public static string ReplaceOrderBy (string sql, string orderby) {
             string string1 = "--{{ORDER_BY_START}}";
             string string2 = "--{{ORDER_BY_END}}";
             string result = sql;
             try {
-                string firstPart = sql.Split(new string[] { string1 }, StringSplitOptions.None)[0];
-                string secondPart = sql.Split(new string[] { string2 }, StringSplitOptions.None)[1];
-                sql = (firstPart + " " + orderby + " " + secondPart).Trim();
+                string firstPart = sql.Split (new string[] { string1 }, StringSplitOptions.None) [0];
+                string secondPart = sql.Split (new string[] { string2 }, StringSplitOptions.None) [1];
+                sql = (firstPart + " " + orderby + " " + secondPart).Trim ();
             } catch {
                 sql = result;
             }
             return sql;
         }
-        public static string ReplaceParams(string sql, string sqlParams) {
-            return sql.Replace("--{{PARAMS}}",sqlParams);
+        public static string ReplaceParams (string sql, string sqlParams) {
+            return sql.Replace ("--{{PARAMS}}", sqlParams);
         }
     }
 
     public class SqlHelper {
+
+        public static List<T> GetList<T> (string sql, ref int totalRows) where T : new () {
+            string connectionString = Helper.ConnectionString;
+            Type businessEntityType = typeof (T);
+            List<T> entitys = new List<T> ();
+            //Hashtable hashtable = new Hashtable();
+            PropertyInfo[] properties = businessEntityType.GetProperties ();
+            using (SqlConnection connection = new SqlConnection (connectionString)) {
+                connection.Open ();
+                using (SqlCommand command = new SqlCommand (sql, connection)) {
+                    using (SqlDataReader dr = command.ExecuteReader ()) {
+                        while (dr.Read ()) {
+                            totalRows = (int)dr["Count"];
+                        }
+                        dr.NextResult();
+                        while (dr.Read ()) {
+                            T newObject = new T ();
+                            for (int index = 0; index < dr.FieldCount; index++) {
+                                PropertyInfo info = businessEntityType.GetProperty (dr.GetName (index)); // properties.Select(q => q.Name == dr.GetName(index)).FirstOrDefault(); // (PropertyInfo)hashtable[dr.GetName(index).ToUpper()];
+                                if ((info != null) && info.CanWrite) {
+                                    SetValue (newObject, info, dr.GetValue (index));
+                                    //info.SetValue(newObject,dr.GetValue(index).ToString());
+                                    //info.SetValue(newObject,dr.GetValue(index),null);
+                                }
+                            }
+                            entitys.Add (newObject);
+                        }
+                        dr.Close ();
+                    }
+                }
+            }
+            return entitys;
+        }
+
         public static List<T> GetList<T> (string sql) where T : new () {
             string connectionString = Helper.ConnectionString;
             Type businessEntityType = typeof (T);

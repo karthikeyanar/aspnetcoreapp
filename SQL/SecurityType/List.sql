@@ -5,6 +5,11 @@ if isnull(@Name,'')!=''
 	begin
 		set @Name = '%' + RTRIM(@Name) + '%';  
 	end
+
+--START SQL
+select count(*) as [Count] from SecurityType
+where [Name] like @Name or isnull(@Name,'')=''
+
 select * from SecurityType
 where [Name] like @Name or isnull(@Name,'')=''
 --{{ORDER_BY_START}}

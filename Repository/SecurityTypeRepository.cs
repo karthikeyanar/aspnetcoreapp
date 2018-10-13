@@ -29,7 +29,9 @@ namespace aspnetcoreapp.Repository {
             sql = Helper.ReplaceParams(sql,sqlParams);
             //sql = sql.Replace("\r\n"," ");
             PaginatedListResult<SecurityTypeModel> list = new PaginatedListResult<SecurityTypeModel>();
-            list.rows = SqlHelper.GetList<SecurityTypeModel>(sql);
+            int totalRows = 0;
+            list.rows = SqlHelper.GetList<SecurityTypeModel>(sql,ref totalRows);
+            list.total = totalRows;
             return list;
         }
     }
