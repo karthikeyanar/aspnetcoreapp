@@ -1,0 +1,55 @@
+﻿@page
+@{
+    ViewData["Title"] = "";
+}
+<nav class="navbar navbar-light bg-light">
+  <a class="navbar-brand" href="#">Security Type</a>
+</nav>
+<div class="clearfix">&nbsp;</div>
+<table class="table table-hover table-striped" id="tblSecurityType">
+  <thead>
+    <tr>
+      <th sortname="SecurityTypeID" scope="col">#</th>
+      <th sortname="Name" scope="col">Name</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+<div class="row">
+    <div class="col">
+        <div class="d-inline">
+            Rows
+        </div>
+        <div class="d-inline">
+            <select id="rows2" name="rows2" class="form-control d-inline form-control-sm" style="width:100px;">
+            </select>
+        </div>
+    </div>
+    <div class="col">
+        <div class="d-inline">
+            <span id="paging_status"></span>
+        </div>
+    </div>
+    <div class="col">
+        <div class="pull-right">
+          <nav aria-label="Page navigation example">
+              <ul class="manual-pagination pagination justify-content-end">
+              </ul>
+           </nav>
+        </div>
+    </div> 
+</div>
+@section scripts{
+ <script src="~/js/SecurityType.js" asp-append-version="true"></script>
+ <script type="text/html" id="grid-template">
+    {{each(i,row) rows}}
+    <tr>
+        <td>${SecurityTypeID}
+        <input type="hidden" id="hdnSecurityTypeID" value="${SecurityTypeID}" />
+        </td>
+        <td>${Name}</td>
+    </tr>
+    {{/each}}
+</script>
+}

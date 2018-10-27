@@ -11,25 +11,21 @@ using Microsoft.Extensions.Configuration;
 namespace aspnetcoreapp.Controllers {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class SecurityTypeController : ControllerBase {
+    public class BlogController : ControllerBase {
+
         private readonly IConfiguration configuration;
-        public SecurityTypeController(IConfiguration config) {
+        public BlogController(IConfiguration config) {
             configuration = config;
         }
 
         #region snippet_Get
         [HttpGet]
-        public ActionResult<PaginatedListResult<SecurityTypeModel>> List([FromQuery] SearchModel criteria, [FromQuery] Paging paging) {
-            ISecurityTypeRepository repository = new SecurityTypeRepository();
-            return repository.List(criteria, paging);
+        public ActionResult<PaginatedListResult<Blog>> List([FromQuery] SearchModel criteria, [FromQuery] Paging paging) {
+             IBlogRepository repository = new BlogRepository();
+             return repository.List(criteria,paging);
         }
         #endregion
-
-        [HttpPost]
-        public ActionResult<SecurityTypeModel> Save(SecurityTypeModel obj){
-            return null;
-        }
-
+ 
     }
 
 }
