@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Threading.Tasks;
 using aspnetcoreapp.Helpers;
 using aspnetcoreapp.Models;
 using aspnetcoreapp.Repository;
@@ -38,6 +39,15 @@ namespace aspnetcoreapp.Controllers {
             }
         }
         #endregion
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create([FromBody] Post post) {
+            if (!ModelState.IsValid) {
+                return BadRequest(ModelState);
+            }
+            return Ok(post.Save());
+        }
 
     }
 

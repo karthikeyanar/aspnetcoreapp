@@ -1,8 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Data.SqlClient;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
 namespace aspnetcoreapp.Helpers {
@@ -172,4 +177,88 @@ namespace aspnetcoreapp.Helpers {
             return type.IsGenericType && type.GetGenericTypeDefinition ().Equals (typeof (Nullable<>));
         }
     }
+    
+    public enum ConfigUtil {
+        /// <summary>
+        /// Data point used to make sure all the IDs start from this range. 
+        /// Used for validation
+        /// </summary>
+        IDStartRange = 1
+        //CurrentEntityID = 2
+    }
+
+    public enum ErrorType {
+        Error = 1,
+        Warning = 2,
+        NotFound = 3
+    }
+
+    public class ErrorInfo {
+        public ErrorType ErrorType = ErrorType.Error;
+        /// <summary>
+        /// To support serialization
+        /// </summary>
+        public ErrorInfo() {
+            
+        }
+        public ErrorInfo(string propertyName, string errorMessage) {
+            this.PropertyName = propertyName;
+            this.ErrorMessage = errorMessage;
+        }
+        public ErrorInfo(string propertyName, string errorMessage, object onObject) {
+            this.PropertyName = propertyName;
+            this.ErrorMessage = errorMessage;
+            this.Object = onObject;
+        }
+        public ErrorInfo(string propertyName, string errorMessage, object onObject, ErrorType errorType)
+        {
+            this.PropertyName = propertyName;
+            this.ErrorMessage = errorMessage;
+            this.Object = onObject;
+            this.ErrorType = errorType;
+        }
+
+        public string ErrorMessage { get; set; }
+        public object Object { get; set; }
+        public string PropertyName { get; set; }
+    }
+
+    public class ValidationHelper {
+		/// <summary>
+		/// Get any errors associated with the model also investigating any rules dictated by attached Metadata buddy classes.
+		/// </summary>
+		/// <param name="instance"></param>
+		/// <returns></returns>
+		public static IEnumerable<ErrorInfo> Validate(object instance) {
+			//return new List<ErrorInfo>();
+			var metadataAttrib = instance.GetType().GetCustomAttributes(typeof(ModelMetadataTypeAttribute), true).OfType<ModelMetadataTypeAttribute>().FirstOrDefault();
+			var buddyClassOrModelClass = metadataAttrib != null ? metadataAttrib.GetType() : instance.GetType();
+			var buddyClassProperties = TypeDescriptor.GetProperties(buddyClassOrModelClass).Cast<PropertyDescriptor>();
+			var modelClassProperties = TypeDescriptor.GetProperties(instance.GetType()).Cast<PropertyDescriptor>();
+
+			List<ErrorInfo> errors = (from buddyProp in buddyClassProperties
+									  join modelProp in modelClassProperties on buddyProp.Name equals modelProp.Name
+									  from attribute in buddyProp.Attributes.OfType<ValidationAttribute>()
+									  where !attribute.IsValid(modelProp.GetValue(instance))
+									  select new ErrorInfo(buddyProp.Name, attribute.FormatErrorMessage(attribute.ErrorMessage), instance)).ToList();
+			// Add in the class level custom attributes
+			IEnumerable<ErrorInfo> classErrors = from attribute in TypeDescriptor.GetAttributes(buddyClassOrModelClass).OfType<ValidationAttribute>()
+												 where !attribute.IsValid(instance)
+												 select new ErrorInfo("ClassLevelCustom", attribute.FormatErrorMessage(attribute.ErrorMessage), instance);
+
+			errors.AddRange(classErrors);
+			return errors.AsEnumerable();
+		}
+
+		public static string GetErrorInfo(IEnumerable<ErrorInfo> errorInfo) {
+			StringBuilder errors = new StringBuilder();
+			if (errorInfo != null) {
+				foreach (var err in errorInfo.ToList()) {
+					errors.Append(err.ErrorMessage + "\n");
+				}
+			}
+			return errors.ToString();
+		}
+
+	}
 }
