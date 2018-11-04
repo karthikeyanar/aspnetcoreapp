@@ -42,7 +42,7 @@ namespace aspnetcoreapp {
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             Startup.ConnectionString = Configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<BlogContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            //services.AddDbContext<BlogContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
         }
 

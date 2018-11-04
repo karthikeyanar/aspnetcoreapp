@@ -1,5 +1,4 @@
-dotnet ef dbcontext scaffold "Data Source=KAR\SQL2017;Initial Catalog=Blogging;Persist Security Info=True;User ID=sa;Password=raga;MultipleActiveResultSets=True;" Microsoft.EntityFrameworkCore.SqlServer
--o Models -t Blog -t Post --context-dir Context -c BlogContext
+dotnet ef dbcontext scaffold "Data Source=DESKTOP-AER6KFM\\SQL2017;Initial Catalog=Investment;Persist Security Info=True;User ID=sa;Password=raga;MultipleActiveResultSets=True" Microsoft.EntityFrameworkCore.SqlServer -o Models --context-dir Context -c InvestmentContext
 
 
 dotnet aspnet-codegenerator controller -name BlogController -m Blog -dc BlogContext --relativeFolderPath Controllers --useDefaultLayout --referenceScriptLibraries

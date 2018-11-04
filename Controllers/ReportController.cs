@@ -1,3 +1,4 @@
+
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
@@ -11,20 +12,17 @@ using Microsoft.Extensions.Configuration;
 namespace aspnetcoreapp.Controllers {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class BlogController : ControllerBase {
-
+    public class ReportController : ControllerBase {
         private readonly IConfiguration configuration;
-        public BlogController(IConfiguration config) {
+        public ReportController(IConfiguration config) {
             configuration = config;
         }
 
-        #region snippet_Get
         [HttpGet]
-        public ActionResult<PaginatedListResult<Blog>> List([FromQuery] SearchModel criteria, [FromQuery] Paging paging) {
-             IBlogRepository repository = new BlogRepository();
-             return repository.List(criteria,paging);
+        public ActionResult<PaginatedListResult<MonthlyModel>> Monthly([FromQuery] SearchModel criteria) {
+            IReportRepository repository = new ReportRepository();
+            return repository.GetMonthly(criteria);
         }
-        #endregion
  
     }
 

@@ -29,43 +29,19 @@
                   Dashboard <span class="sr-only">(current)</span>
                 </a>
               </li>
-              <li class="nav-item">
-                <a class="nav-link" asp-page="/SecurityType">
-                  <span data-feather="file"></span>
-                  Security Type
-                </a>
-              </li>
             </ul>
 
             <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-              <span>Saved reports</span>
+              <span>Reports</span>
               <a class="d-flex align-items-center text-muted" href="#">
                 <span data-feather="plus-circle"></span>
               </a>
             </h6>
             <ul class="nav flex-column mb-2">
               <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <span data-feather="file-text"></span>
-                  Current month
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <span data-feather="file-text"></span>
-                  Last quarter
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <span data-feather="file-text"></span>
-                  Social engagement
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <span data-feather="file-text"></span>
-                  Year-end sale
+                 <a class="nav-link" asp-page="/Monthly">
+                  <span data-feather="file"></span>
+                  Monthly
                 </a>
               </li>
             </ul>
@@ -83,8 +59,15 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/jquery.tmpl.min.js"></script>
     <script src="~/js/jquery.twbsPagination.js"></script>
+    <script src="~/js/string-helper-1.0.js"></script>
+    <script src="~/js/accounting-0.2.js"></script>
+    <script src="~/js/moment.min-2.10.3.js"></script>
+    <script src="~/js/bootstrap-datepicker/bootstrap-datepicker-1.5.28.js"></script>
+    <link rel="stylesheet" href="~/js/bootstrap-datepicker/bootstrap-datepicker-1.5.1.css" />
     <script src="~/js/FlexGrid2.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @RenderSection("Scripts", required: false)
   </body>

@@ -6,7 +6,7 @@ using System.Linq;
 using aspnetcoreapp.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+/*
 namespace aspnetcoreapp.Models {
     [ModelMetadataType(typeof(PostMD))]
     public partial class Post {
@@ -40,3 +40,4 @@ namespace aspnetcoreapp.Models {
         }
     }
 }
+*/
