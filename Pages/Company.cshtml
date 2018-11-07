@@ -1,0 +1,63 @@
+﻿@page
+@{
+    ViewData["Title"] = "";
+}
+<nav class="navbar navbar-light">
+  <form id="frmSearch" class="form-inline">
+    <a class="navbar-brand" href="#">Company</a>
+    <input type="hidden" name="investing_csv" id="investing_csv" value="" />
+    <input type="hidden" name="investing_total" id="investing_total" value="" />
+    <input type="hidden" name="investing_index" id="investing_index" value="" />
+    <button type="button" class="btn btn-primary ml-5 mr-5" id="lnkInvestingDownload">Investing History Download</button>
+    <button type="button" id="btnInvestingUpdateCSV" class="btn btn-danger btn-sm" style="display:none;">Investing CSV UPDATE</button>
+    <div id="investing_csv_log" style="font-size:50px;"></div>
+  </form>
+</nav>
+<div class="clearfix">&nbsp;</div>
+<table class="table table-hover table-striped" id="tblCompany">
+  <thead>
+    <tr>
+      <th>Company</th>
+      <th>Symbol</th>
+      <th>Url</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+<div class="row">
+    <div class="col">
+        <div class="d-inline">
+            Rows
+        </div>
+        <div class="d-inline">
+            <select id="rows2" name="rows2" class="form-control d-inline form-control-sm" style="width:100px;">
+            </select>
+        </div>
+    </div>
+    <div class="col">
+        <div class="d-inline">
+            <span id="paging_status"></span>
+        </div>
+    </div>
+    <div class="col">
+        <div class="pull-right">
+          <nav aria-label="Page navigation example">
+              <ul class="manual-pagination pagination justify-content-end">
+              </ul>
+           </nav>
+        </div>
+    </div> 
+</div>
+@section scripts{
+ <script src="~/js/Company.js" asp-append-version="true"></script>
+ <script type="text/html" id="grid-template">
+    {{each(i,row) rows}}
+    <tr>
+        <td>${CompanyName}</td>
+        <td>${Symbol}</td>
+        <td>${InvestingUrl}</td>
+    </tr>
+    {{/each}}
+</script>
+}

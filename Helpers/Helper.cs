@@ -363,4 +363,108 @@ namespace aspnetcoreapp.Helpers
         }
 
     }
+
+
+     public static class DataTypeHelper {
+
+        private static string RemoveSymbols(string value) {
+            if(string.IsNullOrEmpty(value) == false) {
+                value = value.Replace("$","").Replace("%","").Replace(",","").Replace("(","-").Replace(")","");
+            }
+            return (value == null ? "" : value);
+        }
+
+        public static float ToFloat(string value) {
+            value = RemoveSymbols(value);
+            float returnValue;
+            float.TryParse(value,out returnValue);
+            return returnValue;
+        }
+
+        public static decimal ToDecimal(string value) {
+            value = RemoveSymbols(value);
+            decimal returnValue;
+            decimal.TryParse(value,out returnValue);
+            return returnValue;
+        }
+
+        public static Int32 ToInt32(object value) {
+            if(value == null || value == DBNull.Value) return 0;
+            string v = RemoveSymbols(value.ToString());
+            if(v.Contains(".")) {
+                decimal deValue = 0;
+                decimal.TryParse(v,out deValue);
+                return (Int32)deValue;
+            } else {
+                Int32 returnValue;
+                Int32.TryParse(v,out returnValue);
+                return returnValue;
+            }
+        }
+
+        public static uint ToUInt(string value) {
+            value = RemoveSymbols(value);
+            if(value.Contains(".")) {
+                decimal deValue = 0;
+                decimal.TryParse(value,out deValue);
+                return (uint)deValue;
+            } else {
+                uint returnValue;
+                uint.TryParse(value,out returnValue);
+                return returnValue;
+            }
+        }
+
+        public static Int32 ToInt32(string value) {
+            value = RemoveSymbols(value);
+            if(value.Contains(".")) {
+                decimal deValue = 0;
+                decimal.TryParse(value,out deValue);
+                return (Int32)deValue;
+            } else {
+                Int32 returnValue;
+                Int32.TryParse(value,out returnValue);
+                return returnValue;
+            }
+        }
+
+        public static Int64 ToInt64(string value) {
+            value = RemoveSymbols(value);
+            if(value.Contains(".")) {
+                decimal deValue = 0;
+                decimal.TryParse(value,out deValue);
+                return (Int64)deValue;
+            } else {
+                Int64 returnValue;
+                Int64.TryParse(value,out returnValue);
+                return returnValue;
+            }
+        }
+
+        public static Int16 ToInt16(string value) {
+            value = RemoveSymbols(value);
+            if(value.Contains(".")) {
+                decimal deValue = 0;
+                decimal.TryParse(value,out deValue);
+                return (Int16)deValue;
+            } else {
+                Int16 returnValue;
+                Int16.TryParse(value,out returnValue);
+                return returnValue;
+            }
+        }
+
+        public static DateTime ToDateTime(string value) {
+            DateTime returnValue;
+            DateTime.TryParse(value,out returnValue);
+            return returnValue.Year <= 1900 ? new DateTime(1900,1,1) : returnValue;
+        }
+
+        public static DateTime ToDateTime(object value) {
+            DateTime returnValue;
+            DateTime.TryParse(Convert.ToString(value),out returnValue);
+            return returnValue.Year <= 1900 ? new DateTime(1900,1,1) : returnValue;
+        }
+
+    }
 }
