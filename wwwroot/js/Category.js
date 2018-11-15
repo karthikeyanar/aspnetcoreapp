@@ -1,41 +1,18 @@
-﻿
-function Company() {
+﻿function Category() {
     var self = this;
 
-    this.index = -1;
-    this.company_json = null;
-
-    this.start = function () {
-        console.log('self.index=', self.index);
-        var symbols = '';
-        for (var i = 0; i < self.company_json.length; i++) {
-            var c = self.company_json[i];
-            symbols += c.CompanyID + '|' + c.InvestingUrl + '|' + formatDate(c.LastTradingDate, 'DD/MM/YYYY') + '|' + formatDate(new Date(), 'DD/MM/YYYY') + ',';
-        }
-        if (symbols != '') {
-            symbols = symbols.substring(0, symbols.length - 1);
-        }
-        if (symbols != '') {
-            console.log('call gccmd', symbols);
-            var $gcb_cmd = $("#gcb_cmd");
-            $gcb_cmd.attr("cmd", "investing-history");
-            $gcb_cmd.attr("symbol", symbols);
-            $gcb_cmd.click();
-        }
-    }
-
-    this.add = function (companyId) {
-        if (companyId > 0) {
-            var $tr = $("#tr" + companyId);
+    this.add = function (categoryId) {
+        if (categoryId > 0) {
+            var $tr = $("#tr" + categoryId);
             var arr = [];
-            arr.push({ "name": "CompanyID", "value": companyId });
+            arr.push({ "name": "CategoryID", "value": categoryId });
             arr.push({ "name": "PageSize", "value": 1 });
             arr.push({ "name": "PageIndex", "value": 1 });
-            arr.push({ "name": "SortName", "value": "CompanyID" });
+            arr.push({ "name": "SortName", "value": "CategoryID" });
             arr.push({ "name": "SortOrder", "value": "asc" });
             $.ajax({
                 type: 'GET',
-                url: apiUrl('/Company/List'),
+                url: apiUrl('/Category/List'),
                 cache: false,
                 data: arr,
                 dataType: 'json',
@@ -50,25 +27,27 @@ function Company() {
                 }
             });
         } else {
-            var $tbl = $("#tblCompany");
+            var $tbl = $("#tblCategory");
             var json = { "rows": [] };
-            json.rows.push({ "CompanyID": 0, "CompanyName": "", "Symbol": "", "InvestingUrl": "", "IsArchive": false, "IsBookMark": false });
+            json.rows.push({ "CategoryID": 0, "CategoryName": "", "IsArchive": false, "IsBookMark": false });
             $("#edit-template").tmpl(json).prependTo($tbl);
-            $(":input[name='CompanyName']", $("#trEdit" + companyId)).focus();
+            $(":input[name='CategoryName']", $("#trEdit" + categoryId)).focus();
         }
     }
 
 }
 
-var _COMPANY = new Company();
+var _CATEGORY = new Category();
 
 $(function () {
-    var $tbl = $("#tblCompany");
+    var $selCategory = $("#selCategory");
+    $selCategory.select2();
+    var $tbl = $("#tblCategory");
 
     $tbl.flexigrid2({
         usepager: true,
         useBoxStyle: false,
-        url: apiUrl("/Company/List"),
+        url: apiUrl("/Category/List"),
         rpOptions: [5, 10, 20, 30, 40, 50, 100, 200, 500, 1000],
         rp: 1000,
         onSubmit: function (p) {
@@ -76,7 +55,7 @@ $(function () {
         },
         onSuccess: function (t, g) { },
         onTemplate: function (data) {
-            _COMPANY.company_json = data.rows;
+            _CATEGORY.category_json = data.rows;
             var tbody = $("tbody", $tbl);
             tbody.empty();
             $("#grid-template").tmpl(data).appendTo(tbody);
@@ -92,53 +71,28 @@ $(function () {
         },
         resizeWidth: true,
         method: "GET",
-        sortname: "CompanyName",
+        sortname: "CategoryName",
         sortorder: "asc",
         autoload: true,
         height: 0,
         applyFixedHeader: true
     });
 
-    var $lnkInvestingDownload = $("#lnkInvestingDownload");
-
-    $lnkInvestingDownload.click(function () {
-        _COMPANY.start();
-    });
-
-    var $btnInvestingUpdateCSV = $("#btnInvestingUpdateCSV");
-    $btnInvestingUpdateCSV.click(function () {
-        var $investing_csv = $("#investing_csv");
-        console.log('investing_csv=', $investing_csv.val());
-        var url = apiUrl("/Company/UpdateCSV");
-        var d = { "csv": $investing_csv.val() };
-        $.ajax({
-            "url": url,
-            "cache": false,
-            "type": "POST",
-            contentType: 'application/json; charset=utf-8',
-            data: JSON.stringify(d)
-        }).done(function (json) {
-            var html = $("#investing_index").val() + ' of ' + $("#investing_total").val() + " - " + json.CompanyName;
-            $("#investing_csv_log").html(html);
-        }).always(function () {
-        });
-    });
-
     $("body").on("click", ".edit-row", function () {
         var $this = $(this);
         var $tr = $this.parents("tr:first");
-        var companyId = $("#CompanyID", $tr).val();
-        _COMPANY.add(companyId);
+        var categoryId = $("#CategoryID", $tr).val();
+        _CATEGORY.add(categoryId);
     });
 
     $("body").on("click", ".delete-row", function () {
         var $this = $(this);
         var $tr = $this.parents("tr:first");
-        var companyId = $("#CompanyID", $tr).val();
-        if(confirm('Are you sure?')){
-            $("#tr"+companyId).remove();
-            $("#trEdit"+companyId).remove();
-            var url = apiUrl("/Company/Delete?id=" + companyId);
+        var categoryId = $("#CategoryID", $tr).val();
+        if (confirm('Are you sure?')) {
+            $("#tr" + categoryId).remove();
+            $("#trEdit" + categoryId).remove();
+            var url = apiUrl("/Category/Delete?id=" + categoryId);
             $.ajax({
                 "url": url,
                 "cache": false,
@@ -150,16 +104,16 @@ $(function () {
     });
 
     $("body").on("click", "#lnkAddNew", function () {
-        _COMPANY.add(0);
+        _CATEGORY.add(0);
     });
 
     $("body").on("click", "#btnSave", function () {
         var $this = $(this);
         var $tr = $this.parents("tr:first");
-        var companyId = $("#CompanyID", $tr).val();
-        var $frm = $("#frm" + companyId);
+        var categoryId = $("#CategoryID", $tr).val();
+        var $frm = $("#frm" + categoryId);
         var arr = $frm.serializeArray();
-        var url = apiUrl("/Company/Save");
+        var url = apiUrl("/Category/Save");
         var d = {};
         for (var i = 0; i < arr.length; i++) {
             d[arr[i].name] = arr[i].value;
@@ -175,7 +129,7 @@ $(function () {
             data: JSON.stringify(d)
         }).done(function (json) {
             console.log('btnSave=', json);
-            var $trDisp = $("#tr"+companyId);
+            var $trDisp = $("#tr" + categoryId);
             $("#grid-template").tmpl(json).insertBefore($tr);
             $trDisp.remove();
             $tr.remove();
@@ -186,7 +140,7 @@ $(function () {
     $("body").on("click", "#btnCancel", function () {
         var $this = $(this);
         var $tr = $this.parents("tr:first");
-        $tr.remove(); 
+        $tr.remove();
     });
 
 });

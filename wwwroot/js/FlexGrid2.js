@@ -120,6 +120,7 @@
                         //console.log(listItem);
                         ddl.options[ddl.options.length] = listItem;
                     };
+                    ddl.value = p.rp;
                     $element.unbind('change').change(function () {
                         p.page = 1;
                         p.rp = this.value;

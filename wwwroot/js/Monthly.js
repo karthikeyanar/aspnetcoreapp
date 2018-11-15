@@ -1,7 +1,7 @@
 ﻿$(function () {
     var $tbl = $("#tblMonthly");
     var $fromDate = $(":input[name='FromDate']");
-    
+
     $fromDate.val(getMonthFirstDate(new Date()));
     $fromDate.datepicker({
         changeMonth: true,
@@ -12,7 +12,11 @@
             $tbl.flexReload2();
         }
     });
-   
+
+    $("#chkIsBookMarkCategory").click(function () {
+        $tbl.flexReload2();
+    });
+
     $tbl.flexigrid2({
         usepager: true,
         useBoxStyle: false,
@@ -30,11 +34,11 @@
             tbody.empty();
             var avg = 0;
             var total = 0;
-            for(var i=0;i<data.rows.length;i++){
+            for (var i = 0; i < data.rows.length; i++) {
                 total += cFloat(data.rows[i].Percentage);
             }
-            avg = total/data.rows.length;
-            $("#lnkAverage").html(formatNumber(avg)+'%');
+            avg = total / data.rows.length;
+            $("#lnkAverage").html(formatNumber(avg) + '%');
             $("#grid-template").tmpl(data).appendTo(tbody);
         },
         onPaginationElement: function () {

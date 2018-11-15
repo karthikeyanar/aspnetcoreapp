@@ -4,18 +4,18 @@ declare @PageSize int;
 
 set @PageIndex = 1;
 set @PageSize = 10;
-set @FromDate = '01/01/2018';
+set @FromDate = '04/01/2018';
  
 DECLARE @TempCalendar TABLE(
 ID smallint Primary Key IDENTITY(1,1)
 ,[Date] DateTime NULL
 ,Average decimal(19,4)
-,TotalEquity int
+,TotalCompany int
 )
 
-DECLARE @TempSymbols TABLE(
+DECLARE @TempCompanyIDs TABLE(
 ID smallint Primary Key IDENTITY(1,1)
-,Symbol varchar(max) NOT NULL
+,CompanyID varchar(max) NOT NULL
 )
 
 declare @monthStartDate datetime,@monthEndDate datetime;
@@ -24,13 +24,13 @@ set @monthEndDate = CONVERT(date,DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,@monthSta
 
 --select @monthStartDate as 'MonthStartDate',@monthEndDate as 'MonthEndDate';
 
-delete from @TempSymbols;
+delete from @TempCompanyIDs;
 
-insert into @TempSymbols(Symbol) 
-select Symbol from dm_month_period_history his
+insert into @TempCompanyIDs(CompanyID) 
+select CompanyID from dm_month_period_history his
 join dm_month_period mp on mp.dm_month_period_id = his.dm_month_period_id
 where mp.FromDate = @monthStartDate and mp.ToDate = @monthEndDate
-order by his.prev_percentage desc
+order by his.prevpercentage desc
 OFFSET (@PageIndex-1)*@PageSize ROWS
 FETCH NEXT @PageSize ROWS ONLY
 
@@ -46,15 +46,15 @@ BEGIN
 	--select @monthStartDate as 'MonthStartDate',@today as 'Today';
 	IF @monthEndDate >= @today 
 		BEGIN
-			insert into @TempCalendar([Date],Average,TotalEquity)
+			insert into @TempCalendar([Date],Average,TotalCompany)
 			select @today
 			,AVG(perc)
-			,(select isnull(count(*),0) from @TempSymbols) as TotalEquity from (
+			,(select isnull(count(*),0) from @TempCompanyIDs) as TotalCompany from (
 			select tbl.*,((isnull(tbl.[Close],0) - isnull(tbl.[Open],0)) / isnull(tbl.[Open],0)) * 100 as Perc  from (
-			select e.Symbol
-			,(select top 1 isnull(his.[Open],0) from EquityPriceHistory his where his.Symbol = e.Symbol and his.[Date] >= @monthStartDate order by his.[Date] asc) as [Open]  
-			,(select top 1 isnull(his.[Close],0) from EquityPriceHistory his where his.Symbol = e.Symbol and his.[Date] <= @today order by his.[Date] desc) as [Close]
-			from @TempSymbols e
+			select e.CompanyID
+			,(select top 1 isnull(his.[Open],0) from CompanyPriceHistory his where his.CompanyID = e.CompanyID and his.[Date] >= @monthStartDate order by his.[Date] asc) as [Open]  
+			,(select top 1 isnull(his.[Close],0) from CompanyPriceHistory his where his.CompanyID = e.CompanyID and his.[Date] <= @today order by his.[Date] desc) as [Close]
+			from @TempCompanyIDs e
 			) as tbl where tbl.[Open] > 0) as tbl2
 		END
 

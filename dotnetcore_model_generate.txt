@@ -1,4 +1,1 @@
-dotnet ef dbcontext scaffold "Data Source=KAR\SQL2008R2;Initial Catalog=onpepperprod;Persist Security Info=True;User ID=sa;Password=raga;MultipleActiveResultSets=True" Microsoft.EntityFrameworkCore.SqlServer -o Model -c "PepperContext"
-
-
-dotnet ef dbcontext scaffold "Data Source=KAR\SQL2008R2;Initial Catalog=onpepperprod;Persist Security Info=True;User ID=sa;Password=raga;MultipleActiveResultSets=True" Microsoft.EntityFrameworkCore.SqlServer -d -o Model -c "PepperContext"
+dotnet ef dbcontext scaffold "Data Source=DESKTOP-AER6KFM\\SQLSERVER2008R2;Initial Catalog=master;Persist Security Info=True;User ID=sa;Password=raga;MultipleActiveResultSets=True" Microsoft.EntityFrameworkCore.SqlServer -o Model

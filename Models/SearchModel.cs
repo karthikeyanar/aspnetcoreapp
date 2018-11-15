@@ -6,6 +6,8 @@ namespace aspnetcoreapp.Models
 {
     public class SearchModel : Paging
     {
+        public int? CompanyID {get;set;}
+        public int? CategoryID {get;set;}
         public bool? IsBookMarkCategory { get; set; }
         public DateTime? FromDate { get; set; }
         public DateTime? LastTradingDate { get; set; }

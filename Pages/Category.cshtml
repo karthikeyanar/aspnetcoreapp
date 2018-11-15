@@ -4,23 +4,18 @@
 }
 <nav class="navbar navbar-light">
   <form id="frmSearch" class="form-inline">
-    <a class="navbar-brand" href="#">Company</a>
-    <input type="hidden" name="investing_csv" id="investing_csv" value="" />
-    <input type="hidden" name="investing_total" id="investing_total" value="" />
-    <input type="hidden" name="investing_index" id="investing_index" value="" />
+    <a class="navbar-brand" href="#">Category</a>
     <button type="button" class="btn btn-success ml-5 mr-5" id="lnkAddNew">Add</button>
-    <button type="button" class="btn btn-primary ml-5 mr-5" id="lnkInvestingDownload">Investing History Download</button>
-    <button type="button" id="btnInvestingUpdateCSV" class="btn btn-danger btn-sm" style="display:none;">Investing CSV UPDATE</button>
-    <div id="investing_csv_log" style="font-size:50px;"></div>
+    <select id="selCategory" class="form-control" style="width:200px;" multiple="multiple">
+    </select>
   </form>
 </nav>
 <div class="clearfix">&nbsp;</div>
-<table class="table table-hover" id="tblCompany">
+<table class="table table-hover" id="tblCategory">
   <thead>
     <tr>
-      <th sortname="CompanyName">Company</th>
-      <th sortname="Symbol">Symbol</th>
-      <th sortname="InvestingUrl">Url</th>
+      <th sortname="CategoryName">Category</th>
+      <th sortname="IsBookMark">Bookmark</th>
       <th></th>
     </tr>
   </thead>
@@ -52,40 +47,31 @@
     </div> 
 </div>
 @section scripts{
- <script src="~/js/Company.js" asp-append-version="true"></script>
+ <script src="~/js/Category.js" asp-append-version="true"></script>
  <script type="text/html" id="grid-template">
     {{each(i,row) rows}}
-    <tr id="tr${CompanyID}">
-        <td class="edit-row">${CompanyName}</td>
-        <td class="edit-row">${Symbol}</td>
-        <td>${InvestingUrl}</td>
+    <tr id="tr${CategoryID}">
+        <td class="edit-row">${CategoryName}</td>
+        <td class="edit-row">{{if IsBookMark==true}}<i class="fa fa-check"></i>{{/if}}</td>
         <td>
             <i class="fa fa-pencil edit-row">&nbsp;</i>
             <i class="fa fa-remove ml-3 delete-row">&nbsp;</i>
-            <input type="hidden" id="CompanyID" value="${CompanyID}">
+            <input type="hidden" id="CategoryID" value="${CategoryID}">
         </td>
     </tr>
     {{/each}}
 </script>
 <script type="text/html" id="edit-template">
     {{each(i,row) rows}}
-    <tr id="trEdit${CompanyID}">
+    <tr id="trEdit${CategoryID}">
         <td colspan="4">
-            <form id="frm${CompanyID}" onsubmit="return false">
+            <form id="frm${CategoryID}" onsubmit="return false">
                 <div class="form-row">
                     <div class="form-group col">
                     <label>Name</label>
-                    <input type="text" class="form-control" name="CompanyName" placeholder="Name" value="${CompanyName}">
-                    </div>
-                    <div class="form-group col">
-                    <label>Symbol</label>
-                    <input type="text" class="form-control" name="Symbol" placeholder="Symbol" value="${Symbol}">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="inputAddress">Url</label>
-                    <input type="text" class="form-control" name="InvestingUrl" placeholder="Url" value="${InvestingUrl}">
-                </div>
+                    <input type="text" class="form-control" name="CategoryName" placeholder="Name" value="${CategoryName}">
+                    </div> 
+                </div> 
                 <div class="form-group">
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="checkbox" id="chkIsArchive" value="true" {{if IsArchive==true}}checked{{/if}}>
@@ -100,7 +86,7 @@
                         </label>
                     </div>
                 </div>
-                <input type="hidden" id="CompanyID" name="CompanyID" value="${CompanyID}">
+                <input type="hidden" id="CategoryID" name="CategoryID" value="${CategoryID}">
                 <button type="button" id="btnSave" class="btn btn-primary">Save</button>
                 <button type="button" id="btnCancel" class="btn btn-danger ml-2">Cancel</button>
             </form>

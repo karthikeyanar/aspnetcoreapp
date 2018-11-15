@@ -12,49 +12,49 @@ using Microsoft.Extensions.Configuration;
 namespace aspnetcoreapp.Repository
 {
 
-    public interface ICompanyRepository
+    public interface ICategoryRepository
     {
-        PaginatedListResult<CompanyModel> Get(SearchModel criteria);
-        PaginatedListResult<CompanyModel> Save(CompanyModel model);
+        PaginatedListResult<CategoryModel> Get(SearchModel criteria);
+        PaginatedListResult<CategoryModel> Save(CategoryModel model);
         void Delete(int id);
     }
 
-    public class CompanyRepository : ICompanyRepository
+    public class CategoryRepository : ICategoryRepository
     {
 
-        public PaginatedListResult<CompanyModel> Get(SearchModel criteria)
+        public PaginatedListResult<CategoryModel> Get(SearchModel criteria)
         {
             string sqlParams = string.Empty;
             sqlParams += string.Format("set @PageSize = {0};", criteria.PageSize);
             sqlParams += string.Format("set @PageIndex = {0};", criteria.PageIndex);
-            if (criteria.CompanyID > 0)
+            if (criteria.CategoryID > 0)
             {
-                sqlParams += string.Format("set @CompanyID = {0};", criteria.CompanyID);
+                sqlParams += string.Format("set @CategoryID = {0};", criteria.CategoryID);
             }
             //sqlParams += string.Format("set @LastTradingDate = '{0}';", (criteria.LastTradingDate ?? Helper.MinDateTime).ToString("yyyy-MM-dd"));
-            string filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "Company", "List.sql");
+            string filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "Category", "List.sql");
             string sql = System.IO.File.ReadAllText(filePath);
             string orderBy = " order by " + criteria.SortName + " " + criteria.SortOrder;
             sql = Helper.ReplaceOrderBy(sql, orderBy);
             sql = Helper.ReplaceParams(sql, sqlParams);
             //sql = sql.Replace("\r\n"," ");
-            PaginatedListResult<CompanyModel> list = new PaginatedListResult<CompanyModel>();
+            PaginatedListResult<CategoryModel> list = new PaginatedListResult<CategoryModel>();
             int totalRows = 0;
-            list.rows = SqlHelper.GetList<CompanyModel>(sql, ref totalRows);
+            list.rows = SqlHelper.GetList<CategoryModel>(sql, ref totalRows);
             list.total = totalRows;
             return list;
         }
 
-        public PaginatedListResult<CompanyModel> Save(CompanyModel model)
+        public PaginatedListResult<CategoryModel> Save(CategoryModel model)
         {
             string filePath = string.Empty;
-            if (model.CompanyID <= 0)
+            if (model.CategoryID <= 0)
             {
-                filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "Company", "Insert.sql");
+                filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "Category", "Insert.sql");
             }
             else
             {
-                filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "Company", "Update.sql");
+                filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "Category", "Update.sql");
             }
             string sql = System.IO.File.ReadAllText(filePath);
             List<SqlParameter> sqlParameterCollection = new List<SqlParameter>();
@@ -72,22 +72,22 @@ namespace aspnetcoreapp.Repository
                 }
             }
             SqlHelper.ExecuteNonQuery(sql, sqlParameterCollection);
-            if (model.CompanyID <= 0)
+            if (model.CategoryID <= 0)
             {
-                sql = "SELECT IDENT_CURRENT ('Company') AS Current_Identity;";
-                model.CompanyID = DataTypeHelper.ToInt32(SqlHelper.ExecuteScaler(sql, new List<SqlParameter>()));
+                sql = "SELECT IDENT_CURRENT ('Category') AS Current_Identity;";
+                model.CategoryID = DataTypeHelper.ToInt32(SqlHelper.ExecuteScaler(sql, new List<SqlParameter>()));
             }
-            return this.Get(new SearchModel { CompanyID = model.CompanyID, SortName = "CompanyID" });
+            return this.Get(new SearchModel { CategoryID = model.CategoryID, SortName = "CategoryID" });
         }
 
         public void Delete(int id)
         {
             string filePath = string.Empty;
-            filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "Company", "Delete.sql");
+            filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "Category", "Delete.sql");
             string sql = System.IO.File.ReadAllText(filePath);
             List<SqlParameter> sqlParameterCollection = new List<SqlParameter>();
             SqlParameter sqlp = new SqlParameter();
-            sqlp.ParameterName = "CompanyID";
+            sqlp.ParameterName = "CategoryID";
             sqlp.Value = id;
             sqlParameterCollection.Add(sqlp);
             SqlHelper.ExecuteNonQuery(sql, sqlParameterCollection);

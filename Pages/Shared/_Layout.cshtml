@@ -12,12 +12,12 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/dashboard.css" />
     <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/font-awesome.css" />
 </head> 
 <body>
     <nav class="header navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0">
       <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Company name</a> 
     </nav>
-    <partial name="_CookieConsentPartial" />
     <div class="container-fluid">
       <div class="row">
         <nav class="col-md-2 d-none d-md-block bg-light sidebar">
@@ -33,6 +33,12 @@
                 <a class="nav-link" asp-page="/Company">
                   <span data-feather="home"></span>
                   Company
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" asp-page="/Category">
+                  <span data-feather="home"></span>
+                  Category
                 </a>
               </li>
             </ul>
@@ -74,6 +80,8 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @RenderSection("Scripts", required: false)
   </body>

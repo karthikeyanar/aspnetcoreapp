@@ -65,3 +65,7 @@ body {
 .table>thead>tr>th.sort.desc:after {
     content: "\f106";
 }
+
+.edit-row,.delete-row,.cursor-pointer{
+    cursor: pointer;
+}

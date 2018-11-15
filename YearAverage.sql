@@ -11,12 +11,12 @@ ID smallint Primary Key IDENTITY(1,1)
 ,FromDate DateTime NULL
 ,ToDate DateTime NULL
 ,Average decimal(19,4)
-,TotalEquity int
+,TotalCompany int
 )
 
-DECLARE @TempSymbols TABLE(
+DECLARE @TempCompanyIDs TABLE(
 ID smallint Primary Key IDENTITY(1,1)
-,Symbol varchar(max) NOT NULL
+,CompanyID varchar(max) NOT NULL
 )
 
 declare @fromDate datetime,@toDate datetime; 
@@ -34,23 +34,23 @@ BEGIN
 	set @monthEndDate = CONVERT(date,DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,@monthStartDate)+1,0)));
 	--select @monthStartDate as 'MonthStartDate',@monthEndDate as 'MonthEndDate';
 
-	delete from @TempSymbols;
+	delete from @TempCompanyIDs;
 
-	insert into @TempSymbols(Symbol) 
-	select Symbol from dm_month_period_history his
+	insert into @TempCompanyIDs(CompanyID) 
+	select CompanyID from dm_month_period_history his
 	join dm_month_period mp on mp.dm_month_period_id = his.dm_month_period_id
 	where mp.FromDate = @monthStartDate and mp.ToDate = @monthEndDate
-	order by his.prev_percentage desc
+	order by his.prevpercentage desc
 	OFFSET (@PageIndex-1)*@PageSize ROWS
     FETCH NEXT @PageSize ROWS ONLY
 
-	insert into @TempCalendar(FromDate,ToDate,Average,TotalEquity)
-	select @monthStartDate,@monthEndDate,AVG(perc),(select isnull(count(*),0) from @TempSymbols) as TotalEquity from (
+	insert into @TempCalendar(FromDate,ToDate,Average,TotalCompany)
+	select @monthStartDate,@monthEndDate,AVG(perc),(select isnull(count(*),0) from @TempCompanyIDs) as TotalCompany from (
 	select tbl.*,((isnull(tbl.[Close],0) - isnull(tbl.[Open],0)) / isnull(tbl.[Open],0)) * 100 as Perc  from (
-	select e.Symbol
-	,(select top 1 isnull(his.[Open],0) from EquityPriceHistory his where his.Symbol = e.Symbol and his.[Date] >= @monthStartDate order by his.[Date] asc) as [Open]  
-	,(select top 1 isnull(his.[Close],0) from EquityPriceHistory his where his.Symbol = e.Symbol and his.[Date] <= @monthEndDate order by his.[Date] desc) as [Close]
-	from @TempSymbols e
+	select e.CompanyID
+	,(select top 1 isnull(his.[Open],0) from CompanyPriceHistory his where his.CompanyID = e.CompanyID and his.[Date] >= @monthStartDate order by his.[Date] asc) as [Open]  
+	,(select top 1 isnull(his.[Close],0) from CompanyPriceHistory his where his.CompanyID = e.CompanyID and his.[Date] <= @monthEndDate order by his.[Date] desc) as [Close]
+	from @TempCompanyIDs e
 	) as tbl where tbl.[Open] > 0) as tbl2
 
     SET @i = @i + 1

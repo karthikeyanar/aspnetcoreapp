@@ -123,7 +123,36 @@ namespace aspnetcoreapp.Helpers
 
     public class SqlHelper
     {
-
+        public static int ExecuteNonQuery(string sql, List<SqlParameter> sqlParameterCollection)
+        {
+            string connectionString = Helper.ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (SqlCommand command = new SqlCommand(sql, connection))
+                {
+                    foreach (SqlParameter p in sqlParameterCollection){
+                        command.Parameters.Add(p);
+                    }
+                    return command.ExecuteNonQuery();
+                }
+            }
+        }
+        public static object ExecuteScaler(string sql, List<SqlParameter> sqlParameterCollection)
+        {
+            string connectionString = Helper.ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (SqlCommand command = new SqlCommand(sql, connection))
+                {
+                    foreach (SqlParameter p in sqlParameterCollection){
+                        command.Parameters.Add(p);
+                    }
+                    return command.ExecuteScalar();
+                }
+            }
+        }
         public static List<T> GetList<T>(string sql, ref int totalRows) where T : new()
         {
             string connectionString = Helper.ConnectionString;
@@ -365,105 +394,132 @@ namespace aspnetcoreapp.Helpers
     }
 
 
-     public static class DataTypeHelper {
+    public static class DataTypeHelper
+    {
 
-        private static string RemoveSymbols(string value) {
-            if(string.IsNullOrEmpty(value) == false) {
-                value = value.Replace("$","").Replace("%","").Replace(",","").Replace("(","-").Replace(")","");
+        private static string RemoveSymbols(string value)
+        {
+            if (string.IsNullOrEmpty(value) == false)
+            {
+                value = value.Replace("$", "").Replace("%", "").Replace(",", "").Replace("(", "-").Replace(")", "");
             }
             return (value == null ? "" : value);
         }
 
-        public static float ToFloat(string value) {
+        public static float ToFloat(string value)
+        {
             value = RemoveSymbols(value);
             float returnValue;
-            float.TryParse(value,out returnValue);
+            float.TryParse(value, out returnValue);
             return returnValue;
         }
 
-        public static decimal ToDecimal(string value) {
+        public static decimal ToDecimal(string value)
+        {
             value = RemoveSymbols(value);
             decimal returnValue;
-            decimal.TryParse(value,out returnValue);
+            decimal.TryParse(value, out returnValue);
             return returnValue;
         }
 
-        public static Int32 ToInt32(object value) {
-            if(value == null || value == DBNull.Value) return 0;
+        public static Int32 ToInt32(object value)
+        {
+            if (value == null || value == DBNull.Value) return 0;
             string v = RemoveSymbols(value.ToString());
-            if(v.Contains(".")) {
+            if (v.Contains("."))
+            {
                 decimal deValue = 0;
-                decimal.TryParse(v,out deValue);
+                decimal.TryParse(v, out deValue);
                 return (Int32)deValue;
-            } else {
+            }
+            else
+            {
                 Int32 returnValue;
-                Int32.TryParse(v,out returnValue);
+                Int32.TryParse(v, out returnValue);
                 return returnValue;
             }
         }
 
-        public static uint ToUInt(string value) {
+        public static uint ToUInt(string value)
+        {
             value = RemoveSymbols(value);
-            if(value.Contains(".")) {
+            if (value.Contains("."))
+            {
                 decimal deValue = 0;
-                decimal.TryParse(value,out deValue);
+                decimal.TryParse(value, out deValue);
                 return (uint)deValue;
-            } else {
+            }
+            else
+            {
                 uint returnValue;
-                uint.TryParse(value,out returnValue);
+                uint.TryParse(value, out returnValue);
                 return returnValue;
             }
         }
 
-        public static Int32 ToInt32(string value) {
+        public static Int32 ToInt32(string value)
+        {
             value = RemoveSymbols(value);
-            if(value.Contains(".")) {
+            if (value.Contains("."))
+            {
                 decimal deValue = 0;
-                decimal.TryParse(value,out deValue);
+                decimal.TryParse(value, out deValue);
                 return (Int32)deValue;
-            } else {
+            }
+            else
+            {
                 Int32 returnValue;
-                Int32.TryParse(value,out returnValue);
+                Int32.TryParse(value, out returnValue);
                 return returnValue;
             }
         }
 
-        public static Int64 ToInt64(string value) {
+        public static Int64 ToInt64(string value)
+        {
             value = RemoveSymbols(value);
-            if(value.Contains(".")) {
+            if (value.Contains("."))
+            {
                 decimal deValue = 0;
-                decimal.TryParse(value,out deValue);
+                decimal.TryParse(value, out deValue);
                 return (Int64)deValue;
-            } else {
+            }
+            else
+            {
                 Int64 returnValue;
-                Int64.TryParse(value,out returnValue);
+                Int64.TryParse(value, out returnValue);
                 return returnValue;
             }
         }
 
-        public static Int16 ToInt16(string value) {
+        public static Int16 ToInt16(string value)
+        {
             value = RemoveSymbols(value);
-            if(value.Contains(".")) {
+            if (value.Contains("."))
+            {
                 decimal deValue = 0;
-                decimal.TryParse(value,out deValue);
+                decimal.TryParse(value, out deValue);
                 return (Int16)deValue;
-            } else {
+            }
+            else
+            {
                 Int16 returnValue;
-                Int16.TryParse(value,out returnValue);
+                Int16.TryParse(value, out returnValue);
                 return returnValue;
             }
         }
 
-        public static DateTime ToDateTime(string value) {
+        public static DateTime ToDateTime(string value)
+        {
             DateTime returnValue;
-            DateTime.TryParse(value,out returnValue);
-            return returnValue.Year <= 1900 ? new DateTime(1900,1,1) : returnValue;
+            DateTime.TryParse(value, out returnValue);
+            return returnValue.Year <= 1900 ? new DateTime(1900, 1, 1) : returnValue;
         }
 
-        public static DateTime ToDateTime(object value) {
+        public static DateTime ToDateTime(object value)
+        {
             DateTime returnValue;
-            DateTime.TryParse(Convert.ToString(value),out returnValue);
-            return returnValue.Year <= 1900 ? new DateTime(1900,1,1) : returnValue;
+            DateTime.TryParse(Convert.ToString(value), out returnValue);
+            return returnValue.Year <= 1900 ? new DateTime(1900, 1, 1) : returnValue;
         }
 
     }

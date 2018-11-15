@@ -32,6 +32,21 @@ namespace aspnetcoreapp.Controllers
         }
 
         [HttpPost]
+        public ActionResult Save(CompanyModel model)
+        {
+            ICompanyRepository repository = new CompanyRepository();
+            return Ok(repository.Save(model));
+        }
+
+        [HttpGet]
+        public ActionResult Delete([FromQuery] int id)
+        {
+            ICompanyRepository repository = new CompanyRepository();
+            repository.Delete(id);
+            return Ok();
+        }
+
+        [HttpPost]
         public ActionResult UpdateCSV(SearchModel model)
         {
             string csvContent = model.csv.Replace("|", Environment.NewLine);
