@@ -47,6 +47,11 @@ namespace aspnetcoreapp.Controllers
         }
 
         [HttpPost]
+        public ActionResult UpdateScreenerCSV(SearchModel model){
+            return Ok();
+        }
+
+        [HttpPost]
         public ActionResult UpdateCSV(SearchModel model)
         {
             string csvContent = model.csv.Replace("|", Environment.NewLine);

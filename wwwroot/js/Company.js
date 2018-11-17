@@ -5,7 +5,7 @@ function Company() {
     this.index = -1;
     this.company_json = null;
 
-    this.start = function () {
+    this.startInvesting = function () {
         console.log('self.index=', self.index);
         var symbols = '';
         for (var i = 0; i < self.company_json.length; i++) {
@@ -19,6 +19,26 @@ function Company() {
             console.log('call gccmd', symbols);
             var $gcb_cmd = $("#gcb_cmd");
             $gcb_cmd.attr("cmd", "investing-history");
+            $gcb_cmd.attr("symbol", symbols);
+            $gcb_cmd.click();
+        }
+    }
+
+    this.startScreener = function () {
+        console.log('self.index=', self.index);
+        var symbols = '';
+        for (var i = 0; i < self.company_json.length; i++) {
+            var c = self.company_json[i];
+            c.ScreenerUrl = '/company/' + c.Symbol;
+            symbols += c.CompanyID + '|' + c.ScreenerUrl + ',';
+        }
+        if (symbols != '') {
+            symbols = symbols.substring(0, symbols.length - 1);
+        }
+        if (symbols != '') {
+            console.log('call gccmd', symbols);
+            var $gcb_cmd = $("#gcb_cmd");
+            $gcb_cmd.attr("cmd", "screener-history");
             $gcb_cmd.attr("symbol", symbols);
             $gcb_cmd.click();
         }
@@ -70,7 +90,7 @@ $(function () {
         useBoxStyle: false,
         url: apiUrl("/Company/List"),
         rpOptions: [5, 10, 20, 30, 40, 50, 100, 200, 500, 1000],
-        rp: 1000,
+        rp: 5,
         onSubmit: function (p) {
             p.params = [];
         },
@@ -102,7 +122,7 @@ $(function () {
     var $lnkInvestingDownload = $("#lnkInvestingDownload");
 
     $lnkInvestingDownload.click(function () {
-        _COMPANY.start();
+        _COMPANY.startInvesting();
     });
 
     var $btnInvestingUpdateCSV = $("#btnInvestingUpdateCSV");
@@ -135,9 +155,9 @@ $(function () {
         var $this = $(this);
         var $tr = $this.parents("tr:first");
         var companyId = $("#CompanyID", $tr).val();
-        if(confirm('Are you sure?')){
-            $("#tr"+companyId).remove();
-            $("#trEdit"+companyId).remove();
+        if (confirm('Are you sure?')) {
+            $("#tr" + companyId).remove();
+            $("#trEdit" + companyId).remove();
             var url = apiUrl("/Company/Delete?id=" + companyId);
             $.ajax({
                 "url": url,
@@ -175,7 +195,7 @@ $(function () {
             data: JSON.stringify(d)
         }).done(function (json) {
             console.log('btnSave=', json);
-            var $trDisp = $("#tr"+companyId);
+            var $trDisp = $("#tr" + companyId);
             $("#grid-template").tmpl(json).insertBefore($tr);
             $trDisp.remove();
             $tr.remove();
@@ -186,7 +206,32 @@ $(function () {
     $("body").on("click", "#btnCancel", function () {
         var $this = $(this);
         var $tr = $this.parents("tr:first");
-        $tr.remove(); 
+        $tr.remove();
+    });
+
+    var $lnkScreenerDownload = $("#lnkScreenerDownload");
+
+    $lnkScreenerDownload.click(function () {
+        _COMPANY.startScreener();
+    });
+
+    var $btnScreenerUpdateCSV = $("#btnScreenerUpdateCSV");
+    $btnScreenerUpdateCSV.click(function () {
+        var $screener_csv = $("#screener_csv");
+        console.log('screener_csv=', $screener_csv.val());
+        var url = apiUrl("/Company/UpdateScreenerCSV");
+        var d = { "csv": $screener_csv.val() };
+        $.ajax({
+            "url": url,
+            "cache": false,
+            "type": "POST",
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(d)
+        }).done(function (json) {
+            var html = $("#screener_index").val() + ' of ' + $("#screener_total").val() + " - " + json.CompanyName;
+            $("#screener_csv_log").html(html);
+        }).always(function () {
+        });
     });
 
 });
