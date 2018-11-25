@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using aspnetcoreapp.Helpers;
 using aspnetcoreapp.Models;
 using aspnetcoreapp.Repository;
@@ -47,7 +48,161 @@ namespace aspnetcoreapp.Controllers
         }
 
         [HttpPost]
-        public ActionResult UpdateScreenerCSV(SearchModel model){
+        public ActionResult UpdateScreenerCSV(SearchModel model)
+        {
+            CompanyFundamental cf = new CompanyFundamental();
+            string csvContent = model.csv;
+            string[] rows = csvContent.Split(("|").ToCharArray());
+            foreach (string row in rows)
+            {
+                string[] cells = row.Split(("~").ToCharArray());
+                if (cells[0].Contains("CompanyID"))
+                {
+                    cf.CompanyID = DataTypeHelper.ToInt32(cells[1]);
+                }
+                else if (cells[0].Contains("Market Cap"))
+                {
+                    cf.MarketCapital = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("52 weeks High / Low"))
+                {
+                    cf.Week52High = DataTypeHelper.ToDecimal(cells[1]);
+                    cf.Week52Low = DataTypeHelper.ToDecimal(cells[2]);
+                }
+                else if (cells[0].Contains("Book Value"))
+                {
+                    cf.BookValue = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Stock P/E"))
+                {
+                    cf.StockPE = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Dividend Yield"))
+                {
+                    cf.DividendYield = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("ROCE"))
+                {
+                    cf.ROCE = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("ROE"))
+                {
+                    cf.ROE = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Sales Growth (3Yrs)"))
+                {
+                    cf.SalesGrowth_3_Years = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Face Value"))
+                {
+                    cf.FaceValue = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Debt to equity"))
+                {
+                    cf.DE = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("PEG Ratio"))
+                {
+                    cf.PEG = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("EPS"))
+                {
+                    cf.EPS = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Interest"))
+                {
+                    cf.Interest = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Profit growth:"))
+                {
+                    cf.ProfitGrowth = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Profit growth 3Years"))
+                {
+                    cf.ProfitGrowth_3_Years = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Promoter holding"))
+                {
+                    cf.PromoterHolding = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Sales growth:"))
+                {
+                    cf.SalesGrowth = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Average return on equity 3Years"))
+                {
+                    cf.ROE_3_Years = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Average return on capital employed 3Years"))
+                {
+                    cf.ROCE_3_Years = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("G Factor"))
+                {
+                    cf.GFactor = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Piotroski score"))
+                {
+                    cf.PiotroskiScore = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Price to Sales"))
+                {
+                    cf.PS = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Price to book value"))
+                {
+                    cf.PB = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Sales growth 5Years"))
+                {
+                    cf.SalesGrowth_5_Years = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Sales growth 7Years"))
+                {
+                    cf.SalesGrowth_7_Years = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Sales growth 10Years"))
+                {
+                    cf.SalesGrowth_10_Years = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Profit growth 5Years"))
+                {
+                    cf.ProfitGrowth_5_Years = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Profit growth 7Years"))
+                {
+                    cf.ProfitGrowth_7_Years = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Profit growth 10Years"))
+                {
+                    cf.ProfitGrowth_10_Years = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Current Price"))
+                {
+                    cf.CurrentPrice = DataTypeHelper.ToDecimal(cells[1]);
+                }
+            }
+            string filePath = string.Empty;
+            filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "CompanyFundamental", "Save.sql");
+            string sql = System.IO.File.ReadAllText(filePath);
+            List<SqlParameter> sqlParameterCollection = new List<SqlParameter>();
+            PropertyInfo[] properties = cf.GetType().GetProperties();
+            SqlParameter sqlp = null;
+            List<String> ignoreProperties = new List<string>() { };
+            foreach (var p in properties)
+            {
+                if (ignoreProperties.Contains(p.Name) == false)
+                {
+                    sqlp = new SqlParameter();
+                    sqlp.ParameterName = p.Name;
+                    sqlp.Value = p.GetValue(cf);
+                    if(DataTypeHelper.ToDecimal(Convert.ToString(sqlp.Value))<=0){
+                        sqlp.Value = 0;
+                    }
+                    sqlParameterCollection.Add(sqlp);
+                }
+            }
+            SqlHelper.ExecuteNonQuery(sql, sqlParameterCollection);
             return Ok();
         }
 

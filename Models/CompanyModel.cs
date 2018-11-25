@@ -28,8 +28,14 @@ namespace aspnetcoreapp.Models
         public decimal? DividendYield { get; set; }
         public decimal? SalesGrowth { get; set; }
         public decimal? SalesGrowth_3_Years { get; set; }
+        public decimal? SalesGrowth_5_Years { get; set; }
+        public decimal? SalesGrowth_7_Years { get; set; }
+        public decimal? SalesGrowth_10_Years { get; set; }
         public decimal? ProfitGrowth { get; set; }
         public decimal? ProfitGrowth_3_Years { get; set; }
+        public decimal? ProfitGrowth_5_Years { get; set; }
+        public decimal? ProfitGrowth_7_Years { get; set; }
+        public decimal? ProfitGrowth_10_Years { get; set; }
         public decimal? DE { get; set; }
         public decimal? PEG { get; set; }
         public decimal? EPS { get; set; }

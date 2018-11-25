@@ -89,8 +89,8 @@ $(function () {
         usepager: true,
         useBoxStyle: false,
         url: apiUrl("/Company/List"),
-        rpOptions: [5, 10, 20, 30, 40, 50, 100, 200, 500, 1000],
-        rp: 5,
+        rpOptions: [10, 20, 30, 40, 50, 100, 200, 500, 1000],
+        rp: 1000,
         onSubmit: function (p) {
             p.params = [];
         },
@@ -140,6 +140,7 @@ $(function () {
         }).done(function (json) {
             var html = $("#investing_index").val() + ' of ' + $("#investing_total").val() + " - " + json.CompanyName;
             $("#investing_csv_log").html(html);
+            $tbl.flexReload2();
         }).always(function () {
         });
     });
@@ -230,6 +231,7 @@ $(function () {
         }).done(function (json) {
             var html = $("#screener_index").val() + ' of ' + $("#screener_total").val() + " - " + json.CompanyName;
             $("#screener_csv_log").html(html);
+            $tbl.flexReload2();
         }).always(function () {
         });
     });
