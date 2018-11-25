@@ -2,16 +2,20 @@
     var $tbl = $("#tblMonthly");
     var $fromDate = $(":input[name='FromDate']");
 
-    $fromDate.val(getMonthFirstDate(new Date()));
+    //$fromDate.val(getMonthFirstDate(new Date()));
     $fromDate.datepicker({
-        changeMonth: true,
-        changeYear: true,
-        onSelect: function (dateText) {
-            console.log(dateText);
-            $fromDate.val(dateText);
-            $tbl.flexReload2();
-        }
+        autoclose: true,
+        minViewMode: 1,
+        format: 'M/yyyy'
+    }).on('changeDate', function (selected) {
+        console.log('monthpicker=', selected.date);
+        $fromDate.val(formatDate(selected.date));
+        $tbl.flexReload2();
     });
+
+    var dt = getMonthFirstDate(new Date());
+    console.log('dt=',dt);
+    $fromDate.datepicker('setDate', (new Date(dt.toString())));
 
     $("#chkIsBookMarkCategory").click(function () {
         $tbl.flexReload2();

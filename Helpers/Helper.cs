@@ -12,6 +12,13 @@ using Microsoft.Extensions.Configuration;
 
 namespace aspnetcoreapp.Helpers
 {
+
+    public class Select2List
+    {
+        public int id { get; set; }
+        public string label { get; set; }
+    }
+
     public class PaginatedListResult<T>
     {
         public int total;
@@ -131,7 +138,8 @@ namespace aspnetcoreapp.Helpers
                 connection.Open();
                 using (SqlCommand command = new SqlCommand(sql, connection))
                 {
-                    foreach (SqlParameter p in sqlParameterCollection){
+                    foreach (SqlParameter p in sqlParameterCollection)
+                    {
                         command.Parameters.Add(p);
                     }
                     return command.ExecuteNonQuery();
@@ -146,7 +154,8 @@ namespace aspnetcoreapp.Helpers
                 connection.Open();
                 using (SqlCommand command = new SqlCommand(sql, connection))
                 {
-                    foreach (SqlParameter p in sqlParameterCollection){
+                    foreach (SqlParameter p in sqlParameterCollection)
+                    {
                         command.Parameters.Add(p);
                     }
                     return command.ExecuteScalar();
@@ -232,6 +241,46 @@ namespace aspnetcoreapp.Helpers
                         while (dr.Read())
                         {
                             average = (decimal)dr["Average"];
+                        }
+                        dr.Close();
+                    }
+                }
+            }
+            return entitys;
+        }
+
+        public static List<T> GetList<T>(string sql, List<SqlParameter> sqlParameterCollection) where T : new()
+        {
+            string connectionString = Helper.ConnectionString;
+            Type businessEntityType = typeof(T);
+            List<T> entitys = new List<T>();
+            //Hashtable hashtable = new Hashtable();
+            PropertyInfo[] properties = businessEntityType.GetProperties();
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (SqlCommand command = new SqlCommand(sql, connection))
+                {
+                    foreach (SqlParameter p in sqlParameterCollection)
+                    {
+                        command.Parameters.Add(p);
+                    }
+                    using (SqlDataReader dr = command.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            T newObject = new T();
+                            for (int index = 0; index < dr.FieldCount; index++)
+                            {
+                                PropertyInfo info = businessEntityType.GetProperty(dr.GetName(index)); // properties.Select(q => q.Name == dr.GetName(index)).FirstOrDefault(); // (PropertyInfo)hashtable[dr.GetName(index).ToUpper()];
+                                if ((info != null) && info.CanWrite)
+                                {
+                                    SetValue(newObject, info, dr.GetValue(index));
+                                    //info.SetValue(newObject,dr.GetValue(index).ToString());
+                                    //info.SetValue(newObject,dr.GetValue(index),null);
+                                }
+                            }
+                            entitys.Add(newObject);
                         }
                         dr.Close();
                     }

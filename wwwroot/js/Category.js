@@ -40,8 +40,6 @@
 var _CATEGORY = new Category();
 
 $(function () {
-    var $selCategory = $("#selCategory");
-    $selCategory.select2();
     var $tbl = $("#tblCategory");
 
     $tbl.flexigrid2({
@@ -52,6 +50,14 @@ $(function () {
         rp: 1000,
         onSubmit: function (p) {
             p.params = [];
+            var chk = $("#chkIsBookMark")[0];
+            if (chk.checked) {
+                p.params.push({ "name": "IsBookMark", "value": true })
+            }
+            chk = $("#chkIsArchive")[0];
+            if (chk.checked) {
+                p.params.push({ "name": "IsArchive", "value": true })
+            }
         },
         onSuccess: function (t, g) { },
         onTemplate: function (data) {
@@ -141,6 +147,14 @@ $(function () {
         var $this = $(this);
         var $tr = $this.parents("tr:first");
         $tr.remove();
+    });
+
+    $("body").on("click", "#frmSearch #chkIsBookMark", function () {
+        $tbl.flexReload2();
+    });
+
+    $("body").on("click", "#frmSearch #chkIsArchive", function () {
+        $tbl.flexReload2();
     });
 
 });

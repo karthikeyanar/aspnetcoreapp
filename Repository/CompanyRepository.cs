@@ -17,6 +17,7 @@ namespace aspnetcoreapp.Repository
         PaginatedListResult<CompanyModel> Get(SearchModel criteria);
         PaginatedListResult<CompanyModel> Save(CompanyModel model);
         void Delete(int id);
+        List<Select2List> FindCompanies(string term);
     }
 
     public class CompanyRepository : ICompanyRepository
@@ -30,6 +31,18 @@ namespace aspnetcoreapp.Repository
             if (criteria.CompanyID > 0)
             {
                 sqlParams += string.Format("set @CompanyID = {0};", criteria.CompanyID);
+            }
+            if (string.IsNullOrEmpty(criteria.CompanyIDs) == false)
+            {
+                sqlParams += string.Format("set @CompanyIDs = '{0}';", criteria.CompanyIDs);
+            }
+            if (string.IsNullOrEmpty(criteria.CategoryIDs) == false)
+            {
+                sqlParams += string.Format("set @CategoryIDs = '{0}';", criteria.CategoryIDs);
+            }
+            if ((criteria.IsBookMarkCategory ?? false) == true)
+            {
+                sqlParams += string.Format("set @isBookMarkCategory = 1;");
             }
             //sqlParams += string.Format("set @LastTradingDate = '{0}';", (criteria.LastTradingDate ?? Helper.MinDateTime).ToString("yyyy-MM-dd"));
             string filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "Company", "List.sql");
@@ -91,6 +104,19 @@ namespace aspnetcoreapp.Repository
             sqlp.Value = id;
             sqlParameterCollection.Add(sqlp);
             SqlHelper.ExecuteNonQuery(sql, sqlParameterCollection);
+        }
+
+        public List<Select2List> FindCompanies(string term)
+        {
+            string filePath = string.Empty;
+            filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "Company", "Select2.sql");
+            string sql = System.IO.File.ReadAllText(filePath);
+            List<SqlParameter> sqlParameterCollection = new List<SqlParameter>();
+            SqlParameter sqlp = new SqlParameter();
+            sqlp.ParameterName = "Term";
+            sqlp.Value = (string.IsNullOrEmpty(term) == false ? "%" + term + "%" : "");
+            sqlParameterCollection.Add(sqlp);
+            return SqlHelper.GetList<Select2List>(sql, sqlParameterCollection);
         }
 
     }

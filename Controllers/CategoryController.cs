@@ -46,6 +46,13 @@ namespace aspnetcoreapp.Controllers
             return Ok();
         }
 
+        [HttpGet]
+        public ActionResult FindCategories([FromQuery] string term)
+        {
+            ICategoryRepository repository = new CategoryRepository();
+            return Ok(repository.FindCategories(term));
+        }
+
     }
 
 }

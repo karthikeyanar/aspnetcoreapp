@@ -15,10 +15,17 @@
     <input type="hidden" name="screener_index" id="screener_index" value="" />
     <div id="screener_csv_log" style="font-size:50px;"></div>
 
-    <button type="button" class="btn btn-success ml-5 mr-5" id="lnkAddNew">Add</button>
-    <button type="button" class="btn btn-primary ml-5 mr-5" id="lnkInvestingDownload">Investing History Download</button>
+    <input type="hidden" id="CompanyIDs">
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <input type="hidden" id="CategoryIDs">
+
+    <div style="margin-left:10px;float:left;">&nbsp;</div><input type="checkbox" id="chkIsBookMarkCategory" checked>&nbsp;BookMark Category
+
+    <button type="button" class="btn btn-info ml-5" id="lnkRefresh">Refresh</button>
+    <button type="button" class="btn btn-success ml-5" id="lnkAddNew">Add</button>
+    <button type="button" class="btn btn-primary ml-5" id="lnkInvestingDownload">Investing History</button>
     <button type="button" id="btnInvestingUpdateCSV" class="btn btn-danger btn-sm" style="display:none;">Investing CSV UPDATE</button>
-    <button type="button" class="btn btn-danger ml-5 mr-5" id="lnkScreenerDownload">Screener History Download</button>
+    <button type="button" class="btn btn-danger ml-5" id="lnkScreenerDownload">Screener History</button>
     <button type="button" id="btnScreenerUpdateCSV" class="btn btn-danger btn-sm" style="display:none;">Screener CSV UPDATE</button>
   </form>
 </nav>
@@ -29,6 +36,7 @@
       <th sortname="CompanyName">Company</th>
       <th sortname="Symbol">Symbol</th>
       <th sortname="InvestingUrl">Url</th>
+      <th sortname="LastTradingDate">LastTradingDate</th>
       <th></th>
     </tr>
   </thead>
@@ -67,6 +75,7 @@
         <td class="edit-row">${CompanyName}</td>
         <td class="edit-row">${Symbol}</td>
         <td>${InvestingUrl}</td>
+        <td>${formatDate(LastTradingDate)}</td>
         <td>
             <i class="fa fa-pencil edit-row">&nbsp;</i>
             <i class="fa fa-remove ml-3 delete-row">&nbsp;</i>
@@ -91,7 +100,7 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="inputAddress">Url</label>
+                    <label for="inputAddress">Investing Url</label>
                     <input type="text" class="form-control" name="InvestingUrl" placeholder="Url" value="${InvestingUrl}">
                 </div>
                 <div class="form-group">

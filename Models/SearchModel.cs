@@ -11,7 +11,10 @@ namespace aspnetcoreapp.Models
         public bool? IsBookMarkCategory { get; set; }
         public DateTime? FromDate { get; set; }
         public DateTime? LastTradingDate { get; set; }
-
+        public string CompanyIDs {get; set;}
+        public string CategoryIDs {get; set;}
+        public bool? IsBookMark {get;set;}
+        public bool? IsArchive {get;set;}
         public string csv {get;set;}
     }
 

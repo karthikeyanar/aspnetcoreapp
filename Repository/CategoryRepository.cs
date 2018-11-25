@@ -17,6 +17,7 @@ namespace aspnetcoreapp.Repository
         PaginatedListResult<CategoryModel> Get(SearchModel criteria);
         PaginatedListResult<CategoryModel> Save(CategoryModel model);
         void Delete(int id);
+        List<Select2List> FindCategories(string term);
     }
 
     public class CategoryRepository : ICategoryRepository
@@ -30,6 +31,14 @@ namespace aspnetcoreapp.Repository
             if (criteria.CategoryID > 0)
             {
                 sqlParams += string.Format("set @CategoryID = {0};", criteria.CategoryID);
+            }
+            if ((criteria.IsBookMark ?? false) == true)
+            {
+                sqlParams += string.Format("set @IsBookMark = 1;");
+            }
+            if ((criteria.IsArchive ?? false) == true)
+            {
+                sqlParams += string.Format("set @IsArchive = 1;");
             }
             //sqlParams += string.Format("set @LastTradingDate = '{0}';", (criteria.LastTradingDate ?? Helper.MinDateTime).ToString("yyyy-MM-dd"));
             string filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "Category", "List.sql");
@@ -91,6 +100,19 @@ namespace aspnetcoreapp.Repository
             sqlp.Value = id;
             sqlParameterCollection.Add(sqlp);
             SqlHelper.ExecuteNonQuery(sql, sqlParameterCollection);
+        }
+
+        public List<Select2List> FindCategories(string term)
+        {
+            string filePath = string.Empty;
+            filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "Category", "Select2.sql");
+            string sql = System.IO.File.ReadAllText(filePath);
+            List<SqlParameter> sqlParameterCollection = new List<SqlParameter>();
+            SqlParameter sqlp = new SqlParameter();
+            sqlp.ParameterName = "Term";
+            sqlp.Value = (string.IsNullOrEmpty(term) == false ? "%" + term + "%" : "");
+            sqlParameterCollection.Add(sqlp);
+            return SqlHelper.GetList<Select2List>(sql, sqlParameterCollection);
         }
 
     }

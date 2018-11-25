@@ -47,6 +47,13 @@ namespace aspnetcoreapp.Controllers
             return Ok();
         }
 
+        [HttpGet]
+        public ActionResult FindCompanies([FromQuery] string term)
+        {
+            ICompanyRepository repository = new CompanyRepository();
+            return Ok(repository.FindCompanies(term));
+        }
+
         [HttpPost]
         public ActionResult UpdateScreenerCSV(SearchModel model)
         {

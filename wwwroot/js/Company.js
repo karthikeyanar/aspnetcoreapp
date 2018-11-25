@@ -10,11 +10,24 @@ function Company() {
         var symbols = '';
         for (var i = 0; i < self.company_json.length; i++) {
             var c = self.company_json[i];
-            symbols += c.CompanyID + '|' + c.InvestingUrl + '|' + formatDate(c.LastTradingDate, 'DD/MM/YYYY') + '|' + formatDate(new Date(), 'DD/MM/YYYY') + ',';
+            if (cString(c.LastTradingDate) == '') {
+                c.LastTradingDate = '01/01/2007';
+            }
+            if (cString(c.InvestingUrl) != '') {
+                if (c.InvestingUrl.indexOf('?cid=') > -1) {
+                    var arr = c.InvestingUrl.split('?cid=');
+                    //console.log(arr);
+                    c.InvestingUrl = arr[0] + '-historical-data' + '?cid=' + arr[1];
+                } else {
+                    c.InvestingUrl = c.InvestingUrl + '-historical-data';
+                }
+                symbols += c.CompanyID + '|' + c.InvestingUrl + '|' + formatDate(c.LastTradingDate, 'DD/MM/YYYY') + '|' + formatDate(new Date(), 'DD/MM/YYYY') + ',';
+            }
         }
         if (symbols != '') {
             symbols = symbols.substring(0, symbols.length - 1);
         }
+        //console.log(symbols);
         if (symbols != '') {
             console.log('call gccmd', symbols);
             var $gcb_cmd = $("#gcb_cmd");
@@ -93,6 +106,12 @@ $(function () {
         rp: 1000,
         onSubmit: function (p) {
             p.params = [];
+            p.params.push({ "name": "CompanyIDs", "value": $("#CompanyIDs").val() });
+            p.params.push({ "name": "CategoryIDs", "value": $("#CategoryIDs").val() });
+            var chk = $("#chkIsBookMarkCategory")[0];
+            if (chk.checked) {
+                p.params.push({ "name": "IsBookMarkCategory", "value": true })
+            }
         },
         onSuccess: function (t, g) { },
         onTemplate: function (data) {
@@ -117,6 +136,65 @@ $(function () {
         autoload: true,
         height: 0,
         applyFixedHeader: true
+    });
+
+    $("#CompanyIDs").val("").select2({
+        placeholder: "Select Company",
+        minimumInputLength: 0,
+        maximumSelectionSize: 1000,
+        minimumResultsForSearch: 0,
+        multiple: true,
+        allowClear: false,
+        delay: 300,
+        width: "300px",
+        query: function (query) {
+            $.getJSON(apiUrl("/Company/FindCompanies?term=" + query.term), function (data) {
+                //var data = [];
+                //for(var i = 0;i<100;i++){
+                //    data.push({"id":"Contact_"+i,"label":"Contact_"+i});
+                //}
+                var callback = function (data, page) {
+                    var s2data = [];
+                    $.each(data, function (i, d) {
+                        s2data.push({ "id": d.id, "text": d.label, "source": d });
+                    });
+                    return { results: s2data };
+                }
+                query.callback(callback(data, query.page));
+            });
+        }
+    }).on("change", function (e) {
+        $tbl.flexReload2();
+    });
+
+
+    $("#CategoryIDs").val("").select2({
+        placeholder: "Select Category",
+        minimumInputLength: 0,
+        maximumSelectionSize: 1000,
+        minimumResultsForSearch: 0,
+        multiple: true,
+        allowClear: false,
+        delay: 300,
+        width: "300px",
+        query: function (query) {
+            $.getJSON(apiUrl("/Category/FindCategories?term=" + query.term), function (data) {
+                //var data = [];
+                //for(var i = 0;i<100;i++){
+                //    data.push({"id":"Contact_"+i,"label":"Contact_"+i});
+                //}
+                var callback = function (data, page) {
+                    var s2data = [];
+                    $.each(data, function (i, d) {
+                        s2data.push({ "id": d.id, "text": d.label, "source": d });
+                    });
+                    return { results: s2data };
+                }
+                query.callback(callback(data, query.page));
+            });
+        }
+    }).on("change", function (e) {
+        $tbl.flexReload2();
     });
 
     var $lnkInvestingDownload = $("#lnkInvestingDownload");
@@ -150,6 +228,10 @@ $(function () {
         var $tr = $this.parents("tr:first");
         var companyId = $("#CompanyID", $tr).val();
         _COMPANY.add(companyId);
+    });
+
+    $("body").on("click", "#chkIsBookMarkCategory", function () {
+        $tbl.flexReload2();
     });
 
     $("body").on("click", ".delete-row", function () {
@@ -208,6 +290,10 @@ $(function () {
         var $this = $(this);
         var $tr = $this.parents("tr:first");
         $tr.remove();
+    });
+
+    $("body").on("click", "#lnkRefresh", function () {
+        $tbl.flexReload2();
     });
 
     var $lnkScreenerDownload = $("#lnkScreenerDownload");
