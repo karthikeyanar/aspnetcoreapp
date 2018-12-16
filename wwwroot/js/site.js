@@ -104,6 +104,7 @@ $.extend(window, {
         if (ty == "object")
             return "";
 
+        console.log('f=',f);
         d = cDateString(d.toString());
         var m = moment(d);
         if (m.get('year') <= 1901)
@@ -128,6 +129,19 @@ $.extend(window, {
             return "";
         } else {
             return accounting.formatNumber(d, { precision: precision, checkNegative: false });
+        }
+    }
+
+    , formatPercentage: function (d, decimalPlace) {
+        var precision = cFloat(decimalPlace);
+        if (precision <= 0) {
+            precision = 2;
+        }
+        d = cFloat(d);
+        if (d == 0) {
+            return "";
+        } else {
+            return accounting.formatNumber(d, { precision: precision, checkNegative: false }) + '%';
         }
     }
 });

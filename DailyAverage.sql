@@ -1,10 +1,20 @@
 declare @FromDate datetime;
 declare @PageIndex int;
 declare @PageSize int;
+declare @IsBookMarkCategory bit;
 
 set @PageIndex = 1;
 set @PageSize = 10;
-set @FromDate = '04/01/2018';
+set @FromDate = '2018/12/01';
+set @IsBookMarkCategory = 1;
+
+declare @TempBookMarkTable table(CompanyID int,IsBookMark bit)
+insert into @TempBookMarkTable(CompanyID,IsBookMark)
+select c.CompanyID,1 as BookMark from company c
+left outer join companycategory cc on cc.companyid = c.companyid
+left outer join category cat on cat.categoryid = cc.categoryid
+where (cat.IsBookMark = @isBookMarkCategory or @isBookMarkCategory is null) 
+group by c.CompanyID
  
 DECLARE @TempCalendar TABLE(
 ID smallint Primary Key IDENTITY(1,1)
@@ -15,7 +25,8 @@ ID smallint Primary Key IDENTITY(1,1)
 
 DECLARE @TempCompanyIDs TABLE(
 ID smallint Primary Key IDENTITY(1,1)
-,CompanyID varchar(max) NOT NULL
+,CompanyID int NOT NULL
+,CompanyName varchar(max) NOT NULL
 )
 
 declare @monthStartDate datetime,@monthEndDate datetime;
@@ -26,13 +37,17 @@ set @monthEndDate = CONVERT(date,DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,@monthSta
 
 delete from @TempCompanyIDs;
 
-insert into @TempCompanyIDs(CompanyID) 
-select CompanyID from dm_month_period_history his
+insert into @TempCompanyIDs(CompanyID,CompanyName) 
+select his.CompanyID,c.CompanyName from dm_month_period_history his
 join dm_month_period mp on mp.dm_month_period_id = his.dm_month_period_id
+join Company c on c.CompanyID = his.CompanyID
+join @TempBookMarkTable tb on tb.CompanyID = his.CompanyID 
 where mp.FromDate = @monthStartDate and mp.ToDate = @monthEndDate
 order by his.prevpercentage desc
 OFFSET (@PageIndex-1)*@PageSize ROWS
 FETCH NEXT @PageSize ROWS ONLY
+
+--select * from @TempCompanyIDs
 
 DECLARE @i int; DECLARE @maxTempGroupID int; DECLARE @numrowsGroup int;
 

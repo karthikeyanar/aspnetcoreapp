@@ -27,7 +27,7 @@ function Company() {
         if (symbols != '') {
             symbols = symbols.substring(0, symbols.length - 1);
         }
-        //console.log(symbols);
+        console.log(symbols);
         if (symbols != '') {
             console.log('call gccmd', symbols);
             var $gcb_cmd = $("#gcb_cmd");
@@ -35,6 +35,22 @@ function Company() {
             $gcb_cmd.attr("symbol", symbols);
             $gcb_cmd.click();
         }
+    }
+
+    this.startNSE = function(){
+        var symbols = '';
+        for (var i = 0; i < self.company_json.length; i++) {
+            symbols += self.company_json[i].Symbol 
+            + '|' + formatDate($("#StartDate").val(),'DD-MM-YYYY')
+            + '|' + formatDate($("#EndDate").val(),'DD-MM-YYYY')
+            + '|' + 'EQ' + ',';
+        }
+        if (symbols != '') {
+            symbols = symbols.substring(0, symbols.length - 1);
+        }
+        $('#gcb_cmd').attr('cmd', 'open_nse');
+        $('#gcb_cmd').attr('symbol', symbols);
+        $('#gcb_cmd').click();
     }
 
     this.startScreener = function () {
@@ -98,6 +114,34 @@ var _COMPANY = new Company();
 $(function () {
     var $tbl = $("#tblCompany");
 
+    var $LastTradingDate = $("#LastTradingDate");
+
+    $LastTradingDate.datepicker({
+        autoclose: true
+    }).on('changeDate', function (selected) {
+        console.log('monthpicker=', selected.date);
+        $LastTradingDate.val(formatDate(selected.date));
+        $tbl.flexReload2();
+    });
+
+    var $StartDate = $("#StartDate");
+
+    $StartDate.datepicker({
+        autoclose: true
+    }).on('changeDate', function (selected) {
+        console.log('monthpicker=', selected.date);
+        $StartDate.val(formatDate(selected.date));
+    });
+
+    var $EndDate = $("#EndDate");
+
+    $EndDate.datepicker({
+        autoclose: true
+    }).on('changeDate', function (selected) {
+        console.log('monthpicker=', selected.date);
+        $EndDate.val(formatDate(selected.date));
+    });
+
     $tbl.flexigrid2({
         usepager: true,
         useBoxStyle: false,
@@ -108,6 +152,7 @@ $(function () {
             p.params = [];
             p.params.push({ "name": "CompanyIDs", "value": $("#CompanyIDs").val() });
             p.params.push({ "name": "CategoryIDs", "value": $("#CategoryIDs").val() });
+            p.params.push({ "name": "LastTradingDate", "value": $("#LastTradingDate").val() });
             var chk = $("#chkIsBookMarkCategory")[0];
             if (chk.checked) {
                 p.params.push({ "name": "IsBookMarkCategory", "value": true })
@@ -203,6 +248,12 @@ $(function () {
         _COMPANY.startInvesting();
     });
 
+    var $lnkNSEDownload = $("#lnkNSEDownload");
+
+    $lnkNSEDownload.click(function () {
+        _COMPANY.startNSE();
+    });
+
     var $btnInvestingUpdateCSV = $("#btnInvestingUpdateCSV");
     $btnInvestingUpdateCSV.click(function () {
         var $investing_csv = $("#investing_csv");
@@ -247,6 +298,23 @@ $(function () {
                 "cache": false,
                 "type": "GET"
             }).done(function (json) {
+            }).always(function () {
+            });
+        }
+    });
+
+    $("body").on("click", ".delete-price-row", function () {
+        var $this = $(this);
+        var $tr = $this.parents("tr:first");
+        var companyId = $("#CompanyID", $tr).val();
+        if (confirm('Are you sure?')) {
+            var url = apiUrl("/Company/DeletePriceHistory?id=" + companyId);
+            $.ajax({
+                "url": url,
+                "cache": false,
+                "type": "GET"
+            }).done(function (json) {
+                $tbl.flexReload2();
             }).always(function () {
             });
         }
@@ -317,6 +385,25 @@ $(function () {
         }).done(function (json) {
             var html = $("#screener_index").val() + ' of ' + $("#screener_total").val() + " - " + json.CompanyName;
             $("#screener_csv_log").html(html);
+            $tbl.flexReload2();
+        }).always(function () {
+        });
+    });
+
+    $("body").on("click", "#btnNSEUpdateCSV", function (event) {
+        var $nse_csv = $("#nse_csv");
+        console.log('nse_csv=', $nse_csv.val());
+        var url = apiUrl("/Company/UpdateNSECSV");
+        var d = { "csv": $nse_csv.val() };
+        $.ajax({
+            "url": url,
+            "cache": false,
+            "type": "POST",
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(d)
+        }).done(function (json) {
+            var html = $("#nse_index").val() + ' of ' + $("#nse_total").val() + " - " + json.CompanyName;
+            $("#nse_csv_log").html(html);
             $tbl.flexReload2();
         }).always(function () {
         });

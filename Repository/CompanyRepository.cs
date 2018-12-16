@@ -17,7 +17,11 @@ namespace aspnetcoreapp.Repository
         PaginatedListResult<CompanyModel> Get(SearchModel criteria);
         PaginatedListResult<CompanyModel> Save(CompanyModel model);
         void Delete(int id);
+        void DeletePriceHistory(int id);
+        void CreateEquitySplit(int companyId);
+        void UpdateCompanyHistory(int id);
         List<Select2List> FindCompanies(string term);
+        PaginatedListResult<SplitCheckModel> GetSplitCheck(SearchModel criteria);
     }
 
     public class CompanyRepository : ICompanyRepository
@@ -44,7 +48,10 @@ namespace aspnetcoreapp.Repository
             {
                 sqlParams += string.Format("set @isBookMarkCategory = 1;");
             }
-            //sqlParams += string.Format("set @LastTradingDate = '{0}';", (criteria.LastTradingDate ?? Helper.MinDateTime).ToString("yyyy-MM-dd"));
+            if ((criteria.LastTradingDate ?? Helper.MinDateTime).Year > 1900)
+            {
+                sqlParams += string.Format("set @LastTradingDate = '{0}';", (criteria.LastTradingDate ?? Helper.MinDateTime).ToString("yyyy-MM-dd"));
+            }
             string filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "Company", "List.sql");
             string sql = System.IO.File.ReadAllText(filePath);
             string orderBy = " order by " + criteria.SortName + " " + criteria.SortOrder;
@@ -55,6 +62,16 @@ namespace aspnetcoreapp.Repository
             int totalRows = 0;
             list.rows = SqlHelper.GetList<CompanyModel>(sql, ref totalRows);
             list.total = totalRows;
+            return list;
+        }
+
+        public PaginatedListResult<SplitCheckModel> GetSplitCheck(SearchModel criteria)
+        {
+            string filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "Split", "SplitCheck.sql");
+            string sql = System.IO.File.ReadAllText(filePath);
+            PaginatedListResult<SplitCheckModel> list = new PaginatedListResult<SplitCheckModel>();
+            list.rows = SqlHelper.GetList<SplitCheckModel>(sql);
+            list.total = list.rows.Count();
             return list;
         }
 
@@ -106,6 +123,19 @@ namespace aspnetcoreapp.Repository
             SqlHelper.ExecuteNonQuery(sql, sqlParameterCollection);
         }
 
+        public void DeletePriceHistory(int id)
+        {
+            string filePath = string.Empty;
+            filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "Company", "DeletePriceHistory.sql");
+            string sql = System.IO.File.ReadAllText(filePath);
+            List<SqlParameter> sqlParameterCollection = new List<SqlParameter>();
+            SqlParameter sqlp = new SqlParameter();
+            sqlp.ParameterName = "CompanyID";
+            sqlp.Value = id;
+            sqlParameterCollection.Add(sqlp);
+            SqlHelper.ExecuteNonQuery(sql, sqlParameterCollection);
+        }
+
         public List<Select2List> FindCompanies(string term)
         {
             string filePath = string.Empty;
@@ -117,6 +147,20 @@ namespace aspnetcoreapp.Repository
             sqlp.Value = (string.IsNullOrEmpty(term) == false ? "%" + term + "%" : "");
             sqlParameterCollection.Add(sqlp);
             return SqlHelper.GetList<Select2List>(sql, sqlParameterCollection);
+        }
+
+        public void UpdateCompanyHistory(int id)
+        {
+            string sql = "exec PROC_dm_equity_period_history " + id;
+            List<SqlParameter> sqlParameterCollection = new List<SqlParameter>();
+            SqlHelper.ExecuteNonQuery(sql, sqlParameterCollection);
+        }
+
+         public void CreateEquitySplit(int companyId)
+        {
+            string sql = "exec PROC_CreateEquityPriceSplit " + companyId;
+            List<SqlParameter> sqlParameterCollection = new List<SqlParameter>();
+            SqlHelper.ExecuteNonQuery(sql, sqlParameterCollection);
         }
 
     }

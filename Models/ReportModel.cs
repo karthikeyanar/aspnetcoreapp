@@ -12,5 +12,8 @@ namespace aspnetcoreapp.Models {
         public DateTime? ToDate {get; set;}
         public DateTime? PrevFromDate {get;set;}
         public DateTime? PrevToDate {get; set;}
+        public string InvestingUrl { get; set; }
+        public DateTime? LastTradingDate { get; set; }
+        public int? CompanyID {get;set;}
     }
 }

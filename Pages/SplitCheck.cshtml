@@ -1,0 +1,74 @@
+﻿@page
+@{
+    ViewData["Title"] = "";
+}
+<nav class="navbar navbar-light">
+  <form id="frmSearch" class="form-inline">
+    <a class="navbar-brand" href="#">Split Check</a> 
+    <input type="hidden" id="CompanyIDs"> 
+    <button type="button" class="btn btn-info ml-2" id="lnkRefresh">Refresh</button> 
+  </form>
+</nav>
+<div class="clearfix">&nbsp;</div>
+<table class="table table-hover" id="tbl">
+  <thead>
+    <tr>
+      <th>Company</th>
+      <th>Symbol</th>
+      <th>Date</th>
+      <th style="text-align:right">Factor</th>
+      <th style="text-align:right">Percentage</th>
+      <th style="text-align:right">Open</th>
+      <th style="text-align:right">PrevClose</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+<div class="row">
+    <div class="col">
+        <div class="d-inline">
+            Rows
+        </div>
+        <div class="d-inline">
+            <select id="rows2" name="rows2" class="form-control d-inline form-control-sm" style="width:100px;">
+            </select>
+        </div>
+    </div>
+    <div class="col">
+        <div class="d-inline">
+            <span id="paging_status"></span>
+        </div>
+    </div>
+    <div class="col">
+        <div class="pull-right">
+          <nav aria-label="Page navigation example">
+              <ul class="manual-pagination pagination justify-content-end">
+              </ul>
+           </nav>
+        </div>
+    </div> 
+</div>
+@section scripts{
+ <script src="~/js/SplitCheck.js" asp-append-version="true"></script>
+ <script type="text/html" id="grid-template">
+    {{each(i,row) rows}}
+    <tr id="tr${i}">
+        <td>${CompanyName}</td>
+        <td>${Symbol}</td>
+        <td>${formatDate(SplitDate)}</td>
+        <td style="text-align:right">${formatNumber(SplitFactor)}</td>
+        <td style="text-align:right">${formatPercentage(Percentage)}</td>
+        <td style="text-align:right">${Open}</td>
+        <td style="text-align:right">${PrevClose}</td>
+        <td>
+            <i class="fa fa-legal split-row" style="cursor:pointer;">&nbsp;</i> 
+            <input type="hidden" id="SplitDate" value="${SplitDate}" />
+            <input type="hidden" id="SplitFactor" value="${SplitFactor}" />
+            <input type="hidden" id="CompanyID" value="${CompanyID}" />
+        </td>
+    </tr>
+    {{/each}}
+</script> 
+}
