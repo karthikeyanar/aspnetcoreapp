@@ -17,15 +17,16 @@ namespace aspnetcoreapp.Models
     }
 
 
-    public class CompanyFundamental
+    public class CompanyFundamental : CompanyModel
     {
-        public int CompanyID { get; set; }
-        public decimal? ROE { get; set; }
-        public decimal? ROE_3_Years { get; set; }
         public decimal? ROCE { get; set; }
-        public decimal? ROCE_3_Years { get; set; }
         public decimal? StockPE { get; set; }
         public decimal? DividendYield { get; set; }
+        public decimal? ROE { get; set; }
+        public decimal? ROE_3_Years { get; set; }
+        public decimal? ROE_5_Years { get; set; }
+        public decimal? ROE_7_Years { get; set; }
+        public decimal? ROE_10_Years { get; set; }
         public decimal? SalesGrowth { get; set; }
         public decimal? SalesGrowth_3_Years { get; set; }
         public decimal? SalesGrowth_5_Years { get; set; }
@@ -36,9 +37,20 @@ namespace aspnetcoreapp.Models
         public decimal? ProfitGrowth_5_Years { get; set; }
         public decimal? ProfitGrowth_7_Years { get; set; }
         public decimal? ProfitGrowth_10_Years { get; set; }
+        public decimal? EPS_Year_1 { get; set; }
+        public decimal? EPS_Year_2 { get; set; }
+        public decimal? EPS_Year_3 { get; set; }
+        public decimal? EPS_Quater_1 { get; set; }
+        public decimal? EPS_Quater_2 { get; set; }
+        public decimal? NetProfit_Quater_1 { get; set; }
+        public decimal? NetProfit_Quater_2 { get; set; }
+        public decimal? NetProfit_Quater_3 { get; set; }
+        public decimal? NetProfit_Quater_4 { get; set; }
+        public decimal? NetProfit_Year_1 { get; set; }
+        public decimal? NetProfit_Year_2 { get; set; }
+        public decimal? NetProfit_Year_3 { get; set; }
         public decimal? DE { get; set; }
         public decimal? PEG { get; set; }
-        public decimal? EPS { get; set; }
         public decimal? Interest { get; set; }
         public decimal? PromoterHolding { get; set; }
         public decimal? BookValue { get; set; }
@@ -51,5 +63,24 @@ namespace aspnetcoreapp.Models
         public decimal? GFactor { get; set; }
         public decimal? PS { get; set; }
         public decimal? PB { get; set; }
+        public DateTime? LastUpdatedDate { get; set; }
+
+
+        //Others
+        public string Categories { get; set; }
+        public decimal? AvgYearProfit { get; set; }
+        public int? Positive { get; set; }
+        public int? Negative { get; set; }
+        public int? TotalYears { get; set; }
+        public decimal? Profit_2009 { get; set; }
+        public decimal? Profit_2010 { get; set; }
+        public decimal? Profit_2011 { get; set; }
+        public decimal? Profit_2012 { get; set; }
+        public decimal? Profit_2013 { get; set; }
+        public decimal? Profit_2014 { get; set; }
+        public decimal? Profit_2015 { get; set; }
+        public decimal? Profit_2016 { get; set; }
+        public decimal? Profit_2017 { get; set; }
+        public decimal? Profit_2018 { get; set; }
     }
 }

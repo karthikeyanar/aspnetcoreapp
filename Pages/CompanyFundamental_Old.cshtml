@@ -1,0 +1,172 @@
+﻿@page
+@{
+    ViewData["Title"] = "";
+}  
+ <form id="frmSearch">
+<input type="hidden" name="screener_csv" id="screener_csv" value="" />
+<input type="hidden" name="screener_total" id="screener_total" value="" />
+<input type="hidden" name="screener_index" id="screener_index" value="" />
+<div id="screener_csv_log" style="font-size:50px;"></div>
+<button type="button" class="btn btn-danger ml-2 pull-right" id="lnkScreenerDownload">Screener.Com</button>
+<button type="button" id="btnScreenerUpdateCSV" class="btn btn-danger btn-sm" style="display:none;">Screener CSV UPDATE</button>
+</form>
+<div class="row">
+    <div class="col"><h1 id="lblCompanyName"></h1></div>
+</div>
+<div class="row">
+    <div class="col" id="netprofit_quater" style="width:500px;height:350px;"></div>
+    <div class="col" id="netprofit_year" style="width:500px;height:350px;"></div>
+</div>
+<div class="row">
+    <div class="col" id="sales_growth" style="width:500px;height:350px;"></div>
+    <div class="col" id="profit_growth" style="width:500px;height:350px;"></div>
+</div>
+
+@section scripts{
+<script>
+        @{
+            string id = HttpContext.Request.Query["id"].ToString();
+        }
+        var companyId = @id;
+        var _JSON = null;
+        $(function(){
+
+var $lnkScreenerDownload = $("#lnkScreenerDownload");
+
+    $lnkScreenerDownload.click(function () {
+        var symbols = '';
+        for (var i = 0; i < _JSON.length; i++) {
+            var c = _JSON[i];
+            c.ScreenerUrl = '/company/' + c.Symbol;
+            symbols += c.CompanyID + '|' + c.ScreenerUrl + ',';
+        }
+        if (symbols != '') {
+            symbols = symbols.substring(0, symbols.length - 1);
+        }
+        if (symbols != '') {
+            console.log('call gccmd', symbols);
+            var $gcb_cmd = $("#gcb_cmd");
+            $gcb_cmd.attr("cmd", "screener-history");
+            $gcb_cmd.attr("symbol", symbols);
+            $gcb_cmd.click();
+        }
+    });
+
+       var $btnScreenerUpdateCSV = $("#btnScreenerUpdateCSV");
+    $btnScreenerUpdateCSV.click(function () {
+        var $screener_csv = $("#screener_csv");
+        console.log('screener_csv=', $screener_csv.val());
+        var url = apiUrl("/Company/UpdateScreenerCSV");
+        var d = { "csv": $screener_csv.val() };
+        $.ajax({
+            "url": url,
+            "cache": false,
+            "type": "POST",
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(d)
+        }).done(function (json) {
+            var html = $("#screener_index").val() + ' of ' + $("#screener_total").val() + " - " + json.CompanyName;
+            $("#screener_csv_log").html(html);
+            $tbl.flexReload2();
+        }).always(function () {
+        });
+    });
+
+
+        var url = apiUrl("/Company/FindCompanyFundamental?id=" + companyId);
+        $.ajax({
+            "url": url,
+            "cache": false,
+            "type": "GET"
+        }).done(function (json) {
+            var d = json[0];
+            _JSON = json;
+            $("#lblCompanyName").html(d.CompanyName);
+            google.charts.load('current', {
+                'packages': ['bar']
+            });
+            google.charts.setOnLoadCallback(function () {
+                var data = google.visualization.arrayToDataTable([
+                    ['', 'Sales Growth'],
+                    ['10 Years', d.SalesGrowth_10_Years],
+                    ['7 Years', d.SalesGrowth_7_Years],
+                    ['5 Years', d.SalesGrowth_5_Years],
+                    ['3 Years', d.SalesGrowth_3_Years],
+                    ['Current', d.SalesGrowth]
+                ]);
+
+                var options = {
+                    chart: {
+                        title: 'Sales Growth',
+                        subtitle: ''
+                    }
+                };
+                var chart = new google.charts.Bar(document.getElementById('sales_growth'));
+                chart.draw(data, google.charts.Bar.convertOptions(options));
+
+                
+                data = google.visualization.arrayToDataTable([
+                    ['', 'Profit Growth'],
+                    ['10 Years', d.ProfitGrowth_10_Years],
+                    ['7 Years', d.ProfitGrowth_7_Years],
+                    ['5 Years', d.ProfitGrowth_5_Years],
+                    ['3 Years', d.ProfitGrowth_3_Years],
+                    ['Current', d.ProfitGrowth]
+                ]);
+
+                var options = {
+                    chart: {
+                        title: 'Profit Growth',
+                        subtitle: ''
+                    },
+                    bars: 'vertical',
+                    colors: ['#1b9e77']
+                };
+                chart = new google.charts.Bar(document.getElementById('profit_growth'));
+                chart.draw(data, google.charts.Bar.convertOptions(options));
+
+
+                data = google.visualization.arrayToDataTable([
+                    ['', 'Net Profit Quater'],
+                    ['Prev 3', d.NetProfit_Quater_4],
+                    ['Prev 2', d.NetProfit_Quater_3],
+                    ['Prev 1', d.NetProfit_Quater_2],
+                    ['Current', d.NetProfit_Quater_1]
+                ]);
+
+                var options = {
+                    chart: {
+                        title: 'Net Profit Quater',
+                        subtitle: ''
+                    },
+                    bars: 'vertical',
+                    hAxis: {format:'decimal'},
+                    colors: ['red']
+                };
+                chart = new google.charts.Bar(document.getElementById('netprofit_quater'));
+                chart.draw(data, google.charts.Bar.convertOptions(options));
+
+                 data = google.visualization.arrayToDataTable([
+                    ['', 'Net Profit Year'],
+                    ['Prev 3', d.NetProfit_Year_3],
+                    ['Prev 1', d.NetProfit_Year_2],
+                    ['Current', d.NetProfit_Year_1]
+                ]);
+
+                var options = {
+                    chart: {
+                        title: 'Net Profit Year',
+                        subtitle: ''
+                    },
+                    bars: 'vertical',
+                    hAxis: {format:'decimal'},
+                    colors: ['#4B0082']
+                };
+                chart = new google.charts.Bar(document.getElementById('netprofit_year'));
+                chart.draw(data, google.charts.Bar.convertOptions(options));
+
+            });
+    });
+        });
+</script>
+}

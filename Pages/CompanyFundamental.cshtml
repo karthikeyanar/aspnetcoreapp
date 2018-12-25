@@ -1,0 +1,814 @@
+﻿@page
+@{
+    Layout = null;
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+
+    <title></title>
+</head>
+<body>
+    
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+
+    <div class="container">
+        <div class="clearfix">&nbsp;</div>
+        <div class="row">
+            <div class="col">
+                <h1 id="lblCompanyName"></h1>
+            </div> 
+        </div>
+        <div class="row">
+            <div class="col">
+                <b>
+                <label id="lblCategories"></label><br/></b>
+                <label>Market Capital:&nbsp;</label><b><label id="lblMarketCapital"></label></b><br/>
+                <label>Piotroski Score:&nbsp;</label><b><label id="lblPiotroskiScore"></label></b><br/>
+                <label>G Factor:&nbsp;</label><b><label id="lblGFactor"></label></b><br/>
+                <label>Current Price:&nbsp;</label><b><label id="lblCurrentPrice"></label></b><br/>
+                <label>52 Week High:&nbsp;</label><b><label id="lbl52WeekHigh"></label></b><br/>
+                <label>52 Week Low:&nbsp;</label><b><label id="lbl52WeekLow"></label></b><br/>
+                <a id="lnkScreener" target="_blank" class="btn btn-success float-left mr-5">Screener</a>
+                <input type="hidden" name="screener_csv" id="screener_csv" value="" />
+                <input type="hidden" name="screener_total" id="screener_total" value="" />
+                <input type="hidden" name="screener_index" id="screener_index" value="" />
+                <div id="screener_csv_log" style="font-size:50px;"></div>
+                <button type="button" class="btn btn-danger float-left" id="lnkScreenerDownload">Update</button>
+                <button type="button" id="btnScreenerUpdateCSV" class="btn btn-danger btn-sm" style="display:none;">Screener CSV UPDATE</button>
+            </div>
+            <div class="col">
+                <div id="total_profit_pie" style="min-width: 310px; height: 300px; margin: 0 auto"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div id="nse_year" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div id="net_profit_quater" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+            </div>
+            <div class="col">
+                <div id="net_profit_year" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div id="roe_year" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div id="eps_quater" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+            </div>
+            <div class="col">
+                <div id="eps_year" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div id="sales_growth" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+            </div>
+            <div class="col">
+                <div id="profit_growth" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(function() {
+            var _ROOT = null;
+            var ROOT = null;
+            @{
+                string id = HttpContext.Request.Query["id"].ToString();
+            }
+            var companyId = @id;
+
+            var $lnkScreenerDownload = $("#lnkScreenerDownload");
+
+            $lnkScreenerDownload.click(function () {
+                var symbols = '';
+                for (var i = 0; i < _ROOT.length; i++) {
+                    var c = _ROOT[i];
+                    c.ScreenerUrl = '/company/' + c.Symbol;
+                    symbols += c.CompanyID + '|' + c.ScreenerUrl + ',';
+                }
+                if (symbols != '') {
+                    symbols = symbols.substring(0, symbols.length - 1);
+                }
+                if (symbols != '') {
+                    console.log('call gccmd', symbols);
+                    var $gcb_cmd = $("#gcb_cmd");
+                    $gcb_cmd.attr("cmd", "screener-history");
+                    $gcb_cmd.attr("symbol", symbols);
+                    $gcb_cmd.click();
+                }
+            });
+
+            var $btnScreenerUpdateCSV = $("#btnScreenerUpdateCSV");
+            $btnScreenerUpdateCSV.click(function () {
+                var $screener_csv = $("#screener_csv");
+                console.log('screener_csv=', $screener_csv.val());
+                var url = "/api/Company/UpdateScreenerCSV";
+                var d = { "csv": $screener_csv.val() };
+                $.ajax({
+                    "url": url,
+                    "cache": false,
+                    "type": "POST",
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(d)
+                }).done(function (json) {
+                    var html = $("#screener_index").val() + ' of ' + $("#screener_total").val() + " - " + json.CompanyName;
+                    $("#screener_csv_log").html(html);
+                    init();
+                }).always(function () {
+                });
+            });
+
+            
+            function init() {
+                var url = "/api/Company/FindCompanyFundamental?id=" + companyId;
+                $.ajax({
+                    "url": url,
+                    "cache": false,
+                    "type": "GET"
+                }).done(function (json) {
+                    _ROOT = json;
+                    ROOT = json[0];
+                    document.title = ROOT.CompanyName + ' - ' + ROOT.Symbol;
+                    $("#lblCompanyName").html(ROOT.CompanyName + ' - ' + ROOT.Symbol);
+                    $("#lblCategories").html(ROOT.Categories);
+                    $("#lblMarketCapital").html(ROOT.MarketCapital + ' Cr.');
+                    $("#lblPiotroskiScore").html(ROOT.PiotroskiScore);
+                    $("#lblGFactor").html(ROOT.GFactor);
+                    $("#lblCurrentPrice").html(ROOT.CurrentPrice);
+                    $("#lbl52WeekHigh").html(ROOT.Week52High);
+                    $("#lbl52WeekLow").html(ROOT.Week52Low);
+                    $("#lnkScreener").attr('href','https://www.screener.in/company/'+ROOT.Symbol);
+                    totalProfit();
+                    nseYear();
+                    netProfitQuater();
+                    netProfitYear();
+                    roeYear();
+                    epsQuater();
+                    epsYear();
+                    salesGrowth();
+                    profitGrowth();
+                });
+            }
+            function totalProfit() {
+                Highcharts.chart('total_profit_pie',{
+                    chart: {
+                        plotBackgroundColor: null,
+                        plotBorderWidth: 0,
+                        plotShadow: false
+                    },
+                    title: {
+                        text: '',
+                        align: 'center',
+                        verticalAlign: 'middle',
+                        y: 40
+                    },
+                    tooltip: {
+                        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                    },
+                    plotOptions: {
+                        pie: {
+                            //dataLabels: {
+                            //    enabled: true,
+                            //    distance: -50,
+                            //    style: {
+                            //        fontWeight: 'bold',
+                            //        color: 'white'
+                            //    }
+                            //},
+                            dataLabels: {
+                                enabled: true,
+                                distance: -10,
+                                format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                                style: {
+                                    fontSize: '14px',fontWeight: 'normal',color: '#444444',fontFamily: 'Arial'
+                                }
+                            },
+                            startAngle: -90,
+                            endAngle: 90,
+                            center: ['50%','75%'],
+                            size: '110%'
+                        }
+                    },
+                    series: [{
+                        type: 'pie',
+                        name: '',
+                        innerSize: '50%',
+                        data: [
+                            ['Positive',ROOT.Positive],
+                            ['Negative',ROOT.Negative]
+                        ]
+                    }]
+                }); 
+            }
+            function nseYear() {
+                var arr = [ROOT.Profit_2009,ROOT.Profit_2010,ROOT.Profit_2011,ROOT.Profit_2012,ROOT.Profit_2013,ROOT.Profit_2014,ROOT.Profit_2015
+                            ,ROOT.Profit_2016,ROOT.Profit_2017,ROOT.Profit_2018];
+                Highcharts.chart('nse_year',{
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: 'NSE Year'
+                    },xAxis: {
+                        categories: ['2009','2010','2011','2012','2013','2014','2015','2016','2017','2018'],
+                        labels: {
+                            style: {
+                                color: 'blue'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        title: {
+                            text: ''
+                        },
+                        labels: {
+                            //formatter: function() {
+                            //    return this.value; //formatPercentage(this.value);
+                            //},
+                            style: {
+                                fontSize: '13px',fontWeight: 'normal',color: '#444444',fontFamily: 'Arial'
+                            }
+                        }
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            dataLabels: {
+                                enabled: true,
+                                format: '{point.y:.1f}%'
+                            }
+                        }
+                    },
+                    labels: {
+                        items: [{
+                            html: '',
+                            style: {
+                                left: '50px',
+                                top: '18px',
+                                color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                            }
+                        }]
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        type: 'column',
+                        name: 'NSE Year',
+                        color: 'darkcyan',
+                        data: arr
+                    },{
+                        type: 'line',
+                        name: 'NSE Year',
+                        data: arr,
+                        color: 'red',
+                        marker: {
+                            lineWidth: 2,
+                            lineColor: Highcharts.getOptions().colors[3],
+                            fillColor: 'white'
+                        }
+                    }]
+                });
+            }
+            function roeYear() {
+                var arr = [ROOT.ROE_10_Years,ROOT.ROE_7_Years,ROOT.ROE_5_Years,ROOT.ROE_3_Years,ROOT.ROE];
+                Highcharts.chart('roe_year',{
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: 'ROE Year'
+                    },xAxis: {
+                        categories: ['10 Years','7 Years','5 Years','3 Years','Current'],
+                        labels: {
+                            style: {
+                                color: 'black'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        title: {
+                            text: ''
+                        },
+                        labels: {
+                            //formatter: function() {
+                            //    return this.value; //formatPercentage(this.value);
+                            //},
+                            style: {
+                                fontSize: '13px',fontWeight: 'normal',color: '#444444',fontFamily: 'Arial'
+                            }
+                        }
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            dataLabels: {
+                                enabled: true,
+                                format: '{point.y:.1f}'
+                            }
+                        }
+                    },
+                    labels: {
+                        items: [{
+                            html: '',
+                            style: {
+                                left: '50px',
+                                top: '18px',
+                                color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                            }
+                        }]
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        type: 'column',
+                        name: 'ROE Year',
+                        color: 'pink',
+                        data: arr
+                    },{
+                        type: 'line',
+                        name: 'ROE Year',
+                        data: arr,
+                        color: 'red',
+                        marker: {
+                            lineWidth: 2,
+                            lineColor: Highcharts.getOptions().colors[3],
+                            fillColor: 'white'
+                        }
+                    }]
+                });
+            }
+            function epsYear() {
+                var arr = [ROOT.EPS_Year_3,ROOT.EPS_Year_2,ROOT.EPS_Year_1];
+                Highcharts.chart('eps_year',{
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: 'EPS Year'
+                    },xAxis: {
+                        categories: ['Year 2','Year 1','Current'],
+                        labels: {
+                            style: {
+                                color: 'blue'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        title: {
+                            text: ''
+                        },
+                        labels: {
+                            //formatter: function() {
+                            //    return this.value; //formatPercentage(this.value);
+                            //},
+                            style: {
+                                fontSize: '13px',fontWeight: 'normal',color: '#444444',fontFamily: 'Arial'
+                            }
+                        }
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            dataLabels: {
+                                enabled: true,
+                                format: '{point.y:.1f}'
+                            }
+                        }
+                    },
+                    labels: {
+                        items: [{
+                            html: '',
+                            style: {
+                                left: '50px',
+                                top: '18px',
+                                color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                            }
+                        }]
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        type: 'column',
+                        name: 'EPS Year',
+                        color: 'lightgreen',
+                        data: arr
+                    },{
+                        type: 'line',
+                        name: 'EPS Year',
+                        data: arr,
+                        color: 'red',
+                        marker: {
+                            lineWidth: 2,
+                            lineColor: Highcharts.getOptions().colors[3],
+                            fillColor: 'white'
+                        }
+                    }]
+                });
+            }
+            function epsQuater() {
+                var arr = [ROOT.EPS_Quater_2,ROOT.EPS_Quater_1];
+                Highcharts.chart('eps_quater',{
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: 'EPS Quater'
+                    },xAxis: {
+                        categories: ['Quater 1','Current'],
+                        labels: {
+                            style: {
+                                color: 'blue'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        title: {
+                            text: ''
+                        },
+                        labels: {
+                            //formatter: function() {
+                            //    return this.value; //formatPercentage(this.value);
+                            //},
+                            style: {
+                                fontSize: '13px',fontWeight: 'normal',color: '#444444',fontFamily: 'Arial'
+                            }
+                        }
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            dataLabels: {
+                                enabled: true,
+                                format: '{point.y:.1f}'
+                            }
+                        }
+                    },
+                    labels: {
+                        items: [{
+                            html: '',
+                            style: {
+                                left: '50px',
+                                top: '18px',
+                                color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                            }
+                        }]
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        type: 'column',
+                        name: 'EPS Quater',
+                        color: 'lightblue',
+                        data: arr
+                    },{
+                        type: 'line',
+                        name: 'EPS Quater',
+                        data: arr,
+                        color: 'red',
+                        marker: {
+                            lineWidth: 2,
+                            lineColor: Highcharts.getOptions().colors[3],
+                            fillColor: 'white'
+                        }
+                    }]
+                });
+            }
+            function netProfitYear() {
+                var arr = [ROOT.NetProfit_Year_3,ROOT.NetProfit_Year_2,ROOT.NetProfit_Year_1];
+                Highcharts.chart('net_profit_year',{
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: 'Net Profit Year'
+                    },xAxis: {
+                        categories: ['Year 2','Year 1','Current'],
+                        labels: {
+                            style: {
+                                color: 'blue'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        title: {
+                            text: ''
+                        },
+                        labels: {
+                            //formatter: function() {
+                            //    return this.value; //formatPercentage(this.value);
+                            //},
+                            style: {
+                                fontSize: '13px',fontWeight: 'normal',color: '#444444',fontFamily: 'Arial'
+                            }
+                        }
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            dataLabels: {
+                                enabled: true,
+                                format: '{point.y:.1f} Cr.'
+                            }
+                        }
+                    },
+                    labels: {
+                        items: [{
+                            html: '',
+                            style: {
+                                left: '50px',
+                                top: '18px',
+                                color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                            }
+                        }]
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        type: 'column',
+                        name: 'Net Profit Year',
+                        color: 'orange',
+                        data: arr
+                    },{
+                        type: 'line',
+                        name: 'Net Profit Year',
+                        data: arr,
+                        color: 'red',
+                        marker: {
+                            lineWidth: 2,
+                            lineColor: Highcharts.getOptions().colors[3],
+                            fillColor: 'white'
+                        }
+                    }]
+                });
+            }
+            function netProfitQuater() {
+                var arr = [ROOT.NetProfit_Quater_4,ROOT.NetProfit_Quater_3,ROOT.NetProfit_Quater_2,ROOT.NetProfit_Quater_1];
+                Highcharts.chart('net_profit_quater',{
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: 'Net Profit Quater'
+                    },xAxis: {
+                        categories: ['Quater 4','Quater 3','Quater 2','Current'],
+                        labels: {
+                            style: {
+                                color: 'black'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        title: {
+                            text: ''
+                        },
+                        labels: {
+                            //formatter: function() {
+                            //    return this.value; //formatPercentage(this.value);
+                            //},
+                            style: {
+                                fontSize: '13px',fontWeight: 'normal',color: '#444444',fontFamily: 'Arial'
+                            }
+                        }
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            dataLabels: {
+                                enabled: true,
+                                format: '{point.y:.1f} Cr.'
+                            }
+                        }
+                    },
+                    labels: {
+                        items: [{
+                            html: '',
+                            style: {
+                                left: '50px',
+                                top: '18px',
+                                color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                            }
+                        }]
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        type: 'column',
+                        name: 'Net Profit Quater',
+                        color: 'navy',
+                        data: arr
+                    },{
+                        type: 'line',
+                        name: 'Net Profit Quater',
+                        data: arr,
+                        color: 'red',
+                        marker: {
+                            lineWidth: 2,
+                            lineColor: Highcharts.getOptions().colors[3],
+                            fillColor: 'white'
+                        }
+                    }]
+                });
+            }
+            function salesGrowth() {
+                var arr = [ROOT.SalesGrowth_10_Years,ROOT.SalesGrowth_7_Years,ROOT.SalesGrowth_5_Years,ROOT.SalesGrowth_3_Years,ROOT.SalesGrowth];
+                Highcharts.chart('sales_growth',{
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: 'Sales Growth'
+                    },xAxis: {
+                        categories: ['10 Years','7 Years','5 Years','3 Years','Current'],
+                        labels: {
+                            style: {
+                                color: 'blue'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        title: {
+                            text: ''
+                        },
+                        labels: {
+                            //formatter: function() {
+                            //    return this.value; //formatPercentage(this.value);
+                            //},
+                            style: {
+                                fontSize: '13px',fontWeight: 'normal',color: '#444444',fontFamily: 'Arial'
+                            }
+                        }
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            dataLabels: {
+                                enabled: true,
+                                format: '{point.y:.1f}%'
+                            }
+                        }
+                    },
+                    labels: {
+                        items: [{
+                            html: '',
+                            style: {
+                                left: '50px',
+                                top: '18px',
+                                color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                            }
+                        }]
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        type: 'column',
+                        name: 'Sales Growth',
+                        //color: 'green',
+                        data: arr
+                    },{
+                        type: 'line',
+                        name: 'Sales Growth',
+                        data: arr,
+                        color: 'red',
+                        marker: {
+                            lineWidth: 2,
+                            lineColor: Highcharts.getOptions().colors[3],
+                            fillColor: 'white'
+                        }
+                    }]
+                });
+            }
+            function profitGrowth() {
+                var arr = [ROOT.ProfitGrowth_10_Years,ROOT.ProfitGrowth_7_Years,ROOT.ProfitGrowth_5_Years,ROOT.ProfitGrowth_3_Years,ROOT.ProfitGrowth];
+                Highcharts.chart('profit_growth',{
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: 'Profit Growth'
+                    },xAxis: {
+                        categories: ['10 Years','7 Years','5 Years','3 Years','Current'],
+                        labels: {
+                            style: {
+                                color: 'blue'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        title: {
+                            text: ''
+                        },
+                        labels: {
+                            //formatter: function() {
+                            //    return this.value; //formatPercentage(this.value);
+                            //},
+                            style: {
+                                fontSize: '13px',fontWeight: 'normal',color: '#444444',fontFamily: 'Arial'
+                            }
+                        }
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            dataLabels: {
+                                enabled: true,
+                                format: '{point.y:.1f}%'
+                            }
+                        }
+                    },
+                    labels: {
+                        items: [{
+                            html: '',
+                            style: {
+                                left: '50px',
+                                top: '18px',
+                                color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                            }
+                        }]
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        type: 'column',
+                        name: 'Profit Growth',
+                        color: 'green',
+                        data: arr
+                    },{
+                        type: 'line',
+                        name: 'Profit Growth',
+                        data: arr,
+                        color: 'red',
+                        marker: {
+                            lineWidth: 2,
+                            lineColor: Highcharts.getOptions().colors[3],
+                            fillColor: 'white'
+                        }
+                    }]
+                });
+            }
+            init();
+        });
+    </script>
+</body>
+</html>

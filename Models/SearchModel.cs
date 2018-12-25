@@ -6,6 +6,7 @@ namespace aspnetcoreapp.Models
 {
     public class SearchModel : Paging
     {
+        public int? id {get;set;}
         public int? CompanyID {get;set;}
         public int? CategoryID {get;set;}
         public bool? IsBookMarkCategory { get; set; }

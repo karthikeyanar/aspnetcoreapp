@@ -28,10 +28,18 @@ namespace aspnetcoreapp.Controllers
         [HttpGet]
         public ActionResult<PaginatedListResult<CompanyModel>> List([FromQuery] SearchModel criteria)
         {
+            
             ICompanyRepository repository = new CompanyRepository();
             return repository.Get(criteria);
         }
 
+        [HttpGet]
+        public ActionResult<List<CompanyFundamental>> FindCompanyFundamental([FromQuery] SearchModel criteria)
+        {
+            ICompanyRepository repository = new CompanyRepository();
+            return repository.FindCompanyFundamental((criteria.id ?? 0));
+        }
+ 
         [HttpPost]
         public ActionResult Save(CompanyModel model)
         {
@@ -142,9 +150,21 @@ namespace aspnetcoreapp.Controllers
                 {
                     cf.ROE = DataTypeHelper.ToDecimal(cells[1]);
                 }
-                else if (cells[0].Contains("Sales Growth (3Yrs)"))
+                else if (cells[0].Contains("Average return on equity 3Years"))
                 {
-                    cf.SalesGrowth_3_Years = DataTypeHelper.ToDecimal(cells[1]);
+                    cf.ROE_3_Years = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Average return on equity 5Years"))
+                {
+                    cf.ROE_5_Years = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Average return on equity 7Years"))
+                {
+                    cf.ROE_7_Years = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Average return on equity 10Years"))
+                {
+                    cf.ROE_10_Years = DataTypeHelper.ToDecimal(cells[1]);
                 }
                 else if (cells[0].Contains("Face Value"))
                 {
@@ -158,9 +178,25 @@ namespace aspnetcoreapp.Controllers
                 {
                     cf.PEG = DataTypeHelper.ToDecimal(cells[1]);
                 }
-                else if (cells[0].Contains("EPS"))
+                else if (cells[0].Contains("EPS:"))
                 {
-                    cf.EPS = DataTypeHelper.ToDecimal(cells[1]);
+                    cf.EPS_Year_1 = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("EPS last year"))
+                {
+                    cf.EPS_Year_2 = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("EPS preceding year"))
+                {
+                    cf.EPS_Year_3 = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("EPS latest quarter"))
+                {
+                    cf.EPS_Quater_1 = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("EPS preceding quarter"))
+                {
+                    cf.EPS_Quater_2 = DataTypeHelper.ToDecimal(cells[1]);
                 }
                 else if (cells[0].Contains("Interest"))
                 {
@@ -182,14 +218,6 @@ namespace aspnetcoreapp.Controllers
                 {
                     cf.SalesGrowth = DataTypeHelper.ToDecimal(cells[1]);
                 }
-                else if (cells[0].Contains("Average return on equity 3Years"))
-                {
-                    cf.ROE_3_Years = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Average return on capital employed 3Years"))
-                {
-                    cf.ROCE_3_Years = DataTypeHelper.ToDecimal(cells[1]);
-                }
                 else if (cells[0].Contains("G Factor"))
                 {
                     cf.GFactor = DataTypeHelper.ToDecimal(cells[1]);
@@ -205,6 +233,10 @@ namespace aspnetcoreapp.Controllers
                 else if (cells[0].Contains("Price to book value"))
                 {
                     cf.PB = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Sales Growth (3Yrs)"))
+                {
+                    cf.SalesGrowth_3_Years = DataTypeHelper.ToDecimal(cells[1]);
                 }
                 else if (cells[0].Contains("Sales growth 5Years"))
                 {
@@ -234,6 +266,34 @@ namespace aspnetcoreapp.Controllers
                 {
                     cf.CurrentPrice = DataTypeHelper.ToDecimal(cells[1]);
                 }
+                else if (cells[0].Contains("Net Profit latest quarter"))
+                {
+                    cf.NetProfit_Quater_1 = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Net Profit preceding quarter"))
+                {
+                    cf.NetProfit_Quater_2 = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Net profit 2quarters back"))
+                {
+                    cf.NetProfit_Quater_3 = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Net profit 3quarters back"))
+                {
+                    cf.NetProfit_Quater_4 = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Net profit:"))
+                {
+                    cf.NetProfit_Year_1 = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Net Profit last year"))
+                {
+                    cf.NetProfit_Year_2 = DataTypeHelper.ToDecimal(cells[1]);
+                }
+                else if (cells[0].Contains("Net Profit preceding year"))
+                {
+                    cf.NetProfit_Year_3 = DataTypeHelper.ToDecimal(cells[1]);
+                }
             }
             string filePath = string.Empty;
             filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "CompanyFundamental", "Save.sql");
@@ -249,7 +309,7 @@ namespace aspnetcoreapp.Controllers
                     sqlp = new SqlParameter();
                     sqlp.ParameterName = p.Name;
                     sqlp.Value = p.GetValue(cf);
-                    if (DataTypeHelper.ToDecimal(Convert.ToString(sqlp.Value)) <= 0)
+                    if (DataTypeHelper.ToDecimal(Convert.ToString(sqlp.Value)) == 0)
                     {
                         sqlp.Value = 0;
                     }
@@ -284,9 +344,22 @@ namespace aspnetcoreapp.Controllers
                     decimal open = DataTypeHelper.ToDecimal(csv.GetField<string>("Open Price"));
                     decimal high = DataTypeHelper.ToDecimal(csv.GetField<string>("High Price"));
                     decimal low = DataTypeHelper.ToDecimal(csv.GetField<string>("Low Price"));
-                    decimal close = DataTypeHelper.ToDecimal(csv.GetField<string>("Close Price"));
+                    //decimal close = DataTypeHelper.ToDecimal(csv.GetField<string>("Close Price"));
                     decimal change = DataTypeHelper.ToDecimal(csv.GetField<string>("Change"));
-                    decimal prevCloseValue = close - (close * change) / 100;
+                    decimal close = 0;
+                    decimal p = (open * change) / 100;
+                    if (change > 0)
+                        close = open + p;
+                    else
+                        close = open - (p * -1);
+
+                    decimal prevCloseValue = 0;
+                    p = (close * change) / 100;
+                    if (change > 0)
+                        prevCloseValue = close + p;
+                    else
+                        prevCloseValue = close - (p * -1);
+
                     DateTime dt = DataTypeHelper.ToDateTime(date);
                     if (companyID > 0)
                     {
@@ -312,16 +385,26 @@ namespace aspnetcoreapp.Controllers
             {
                 string sql = "";
                 sql = "INSERT INTO [dbo].[CompanyPriceHistory]" + Environment.NewLine +
-               " ([CompanyID]" + Environment.NewLine +
-               ",[Date]" + Environment.NewLine +
-               ",[Open]" + Environment.NewLine +
-               ",[Low]" + Environment.NewLine +
-               ",[High]" + Environment.NewLine +
-               ",[Close]" + Environment.NewLine +
-               ",[PrevClose]" + Environment.NewLine +
+                " ([CompanyID]" + Environment.NewLine +
+                ",[Date]" + Environment.NewLine +
+                ",[Open]" + Environment.NewLine +
+                ",[Low]" + Environment.NewLine +
+                ",[High]" + Environment.NewLine +
+                ",[Close]" + Environment.NewLine +
+                ",[PrevClose]" + Environment.NewLine +
+                ",[OriginalOpen]" + Environment.NewLine +
+                ",[OriginalLow]" + Environment.NewLine +
+                ",[OriginalHigh]" + Environment.NewLine +
+                ",[OriginalClose]" + Environment.NewLine +
+                ",[OriginalPrevClose]" + Environment.NewLine +
                " ) VALUES (" + Environment.NewLine +
                "@companyID" + Environment.NewLine +
                ",@date" + Environment.NewLine +
+               ",@open" + Environment.NewLine +
+               ",@low" + Environment.NewLine +
+               ",@high" + Environment.NewLine +
+               ",@close" + Environment.NewLine +
+               ",@prevclose" + Environment.NewLine +
                ",@open" + Environment.NewLine +
                ",@low" + Environment.NewLine +
                ",@high" + Environment.NewLine +
@@ -385,6 +468,7 @@ namespace aspnetcoreapp.Controllers
             if (companyID > 0)
             {
                 ICompanyRepository repository = new CompanyRepository();
+                //repository.CreateEquitySplit(companyID);
                 repository.UpdateCompanyHistory(companyID);
             }
             return Ok();

@@ -4,83 +4,112 @@ select @count = isnull(count(*),0) from [CompanyFundamental] where CompanyID = @
 IF @count = 0
 	BEGIN
 		INSERT INTO [dbo].[CompanyFundamental]
-				   ([CompanyID]
-				   ,[ROE]
-				   ,[ROE_3_Years]
-				   ,[ROCE]
-				   ,[ROCE_3_Years]
-				   ,[StockPE]
-				   ,[DividendYield]
-				   ,[SalesGrowth]
-				   ,[SalesGrowth_3_Years]
-				   ,[SalesGrowth_5_Years]
-				   ,[SalesGrowth_7_Years]
-				   ,[SalesGrowth_10_Years]
-				   ,[ProfitGrowth]
-				   ,[ProfitGrowth_3_Years]
-				   ,[ProfitGrowth_5_Years]
-				   ,[ProfitGrowth_7_Years]
-				   ,[ProfitGrowth_10_Years]
-				   ,[DE]
-				   ,[PEG]
-				   ,[EPS]
-				   ,[Interest]
-				   ,[PromoterHolding]
-				   ,[BookValue]
-				   ,[FaceValue]
-				   ,[CurrentPrice]
-				   ,[MarketCapital]
-				   ,[Week52High]
-				   ,[Week52Low]
-				   ,[PiotroskiScore]
-				   ,[GFactor]
-				   ,[PS]
-				   ,[PB]
-				   ,[LastUpdatedDate])
-			 VALUES
-				   (@CompanyID
-				   ,@ROE
-				   ,@ROE_3_Years
-				   ,@ROCE
-				   ,@ROCE_3_Years
-				   ,@StockPE
-				   ,@DividendYield
-				   ,@SalesGrowth
-				   ,@SalesGrowth_3_Years
-				   ,@SalesGrowth_5_Years
-				   ,@SalesGrowth_7_Years
-				   ,@SalesGrowth_10_Years
-				   ,@ProfitGrowth
-				   ,@ProfitGrowth_3_Years
-				   ,@ProfitGrowth_5_Years
-				   ,@ProfitGrowth_7_Years
-				   ,@ProfitGrowth_10_Years
-				   ,@DE
-				   ,@PEG
-				   ,@EPS
-				   ,@Interest
-				   ,@PromoterHolding
-				   ,@BookValue
-				   ,@FaceValue
-				   ,@CurrentPrice
-				   ,@MarketCapital
-				   ,@Week52High
-				   ,@Week52Low
-				   ,@PiotroskiScore
-				   ,@GFactor
-				   ,@PS
-				   ,@PB
-				   ,GETDATE())
+           ([CompanyID]
+           ,[ROCE]
+           ,[StockPE]
+           ,[DividendYield]
+           ,[ROE]
+           ,[ROE_3_Years]
+           ,[ROE_5_Years]
+           ,[ROE_7_Years]
+           ,[ROE_10_Years]
+           ,[SalesGrowth]
+           ,[SalesGrowth_3_Years]
+           ,[SalesGrowth_5_Years]
+           ,[SalesGrowth_7_Years]
+           ,[SalesGrowth_10_Years]
+           ,[ProfitGrowth]
+           ,[ProfitGrowth_3_Years]
+           ,[ProfitGrowth_5_Years]
+           ,[ProfitGrowth_7_Years]
+           ,[ProfitGrowth_10_Years]
+           ,[EPS_Year_1]
+           ,[EPS_Year_2]
+           ,[EPS_Year_3]
+           ,[EPS_Quater_1]
+           ,[EPS_Quater_2]
+           ,[NetProfit_Quater_1]
+           ,[NetProfit_Quater_2]
+           ,[NetProfit_Quater_3]
+           ,[NetProfit_Quater_4]
+           ,[NetProfit_Year_1]
+           ,[NetProfit_Year_2]
+           ,[NetProfit_Year_3]
+           ,[DE]
+           ,[PEG]
+           ,[Interest]
+           ,[PromoterHolding]
+           ,[BookValue]
+           ,[FaceValue]
+           ,[CurrentPrice]
+           ,[MarketCapital]
+           ,[Week52High]
+           ,[Week52Low]
+           ,[PiotroskiScore]
+           ,[GFactor]
+           ,[PS]
+           ,[PB]
+           ,[LastUpdatedDate])
+		VALUES
+           (@CompanyID
+           ,@ROCE
+           ,@StockPE
+           ,@DividendYield
+           ,@ROE
+           ,@ROE_3_Years
+           ,@ROE_5_Years
+           ,@ROE_7_Years
+           ,@ROE_10_Years
+           ,@SalesGrowth
+           ,@SalesGrowth_3_Years
+           ,@SalesGrowth_5_Years
+           ,@SalesGrowth_7_Years
+           ,@SalesGrowth_10_Years
+           ,@ProfitGrowth
+           ,@ProfitGrowth_3_Years
+           ,@ProfitGrowth_5_Years
+           ,@ProfitGrowth_7_Years
+           ,@ProfitGrowth_10_Years
+           ,@EPS_Year_1
+           ,@EPS_Year_2
+           ,@EPS_Year_3
+           ,@EPS_Quater_1
+           ,@EPS_Quater_2
+           ,@NetProfit_Quater_1
+           ,@NetProfit_Quater_2
+           ,@NetProfit_Quater_3
+           ,@NetProfit_Quater_4
+           ,@NetProfit_Year_1
+           ,@NetProfit_Year_2
+           ,@NetProfit_Year_3
+           ,@DE
+           ,@PEG
+           ,@Interest
+           ,@PromoterHolding
+           ,@BookValue
+           ,@FaceValue
+           ,@CurrentPrice
+           ,@MarketCapital
+           ,@Week52High
+           ,@Week52Low
+           ,@PiotroskiScore
+           ,@GFactor
+           ,@PS
+           ,@PB
+           ,GETDATE())
 	END
 ELSE
 	BEGIN
 		UPDATE [dbo].[CompanyFundamental]
-		   SET [ROE] = @ROE
-			  ,[ROE_3_Years] = @ROE_3_Years
+		   SET [CompanyID] = @CompanyID
 			  ,[ROCE] = @ROCE
-			  ,[ROCE_3_Years] = @ROCE_3_Years
 			  ,[StockPE] = @StockPE
 			  ,[DividendYield] = @DividendYield
+			  ,[ROE] = @ROE
+			  ,[ROE_3_Years] = @ROE_3_Years
+			  ,[ROE_5_Years] = @ROE_5_Years
+			  ,[ROE_7_Years] = @ROE_7_Years
+			  ,[ROE_10_Years] = @ROE_10_Years
 			  ,[SalesGrowth] = @SalesGrowth
 			  ,[SalesGrowth_3_Years] = @SalesGrowth_3_Years
 			  ,[SalesGrowth_5_Years] = @SalesGrowth_5_Years
@@ -91,9 +120,20 @@ ELSE
 			  ,[ProfitGrowth_5_Years] = @ProfitGrowth_5_Years
 			  ,[ProfitGrowth_7_Years] = @ProfitGrowth_7_Years
 			  ,[ProfitGrowth_10_Years] = @ProfitGrowth_10_Years
+			  ,[EPS_Year_1] = @EPS_Year_1
+			  ,[EPS_Year_2] = @EPS_Year_2
+			  ,[EPS_Year_3] = @EPS_Year_3
+			  ,[EPS_Quater_1] = @EPS_Quater_1
+			  ,[EPS_Quater_2] = @EPS_Quater_2
+			  ,[NetProfit_Quater_1] = @NetProfit_Quater_1
+			  ,[NetProfit_Quater_2] = @NetProfit_Quater_2
+			  ,[NetProfit_Quater_3] = @NetProfit_Quater_3
+			  ,[NetProfit_Quater_4] = @NetProfit_Quater_4
+			  ,[NetProfit_Year_1] = @NetProfit_Year_1
+			  ,[NetProfit_Year_2] = @NetProfit_Year_2
+			  ,[NetProfit_Year_3] = @NetProfit_Year_3
 			  ,[DE] = @DE
 			  ,[PEG] = @PEG
-			  ,[EPS] = @EPS
 			  ,[Interest] = @Interest
 			  ,[PromoterHolding] = @PromoterHolding
 			  ,[BookValue] = @BookValue

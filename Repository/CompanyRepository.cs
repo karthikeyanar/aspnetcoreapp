@@ -22,6 +22,7 @@ namespace aspnetcoreapp.Repository
         void UpdateCompanyHistory(int id);
         List<Select2List> FindCompanies(string term);
         PaginatedListResult<SplitCheckModel> GetSplitCheck(SearchModel criteria);
+        List<CompanyFundamental> FindCompanyFundamental(int id);
     }
 
     public class CompanyRepository : ICompanyRepository
@@ -161,6 +162,19 @@ namespace aspnetcoreapp.Repository
             string sql = "exec PROC_CreateEquityPriceSplit " + companyId;
             List<SqlParameter> sqlParameterCollection = new List<SqlParameter>();
             SqlHelper.ExecuteNonQuery(sql, sqlParameterCollection);
+        }
+
+        public List<CompanyFundamental> FindCompanyFundamental(int id)
+        {
+            string sqlParams = string.Empty;
+            sqlParams += string.Format("set @CompanyID = {0};", id);
+            string filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "CompanyFundamental", "Find.sql");
+            string sql = System.IO.File.ReadAllText(filePath);
+            sql = Helper.ReplaceParams(sql, sqlParams);
+            //sql = sql.Replace("\r\n"," ");
+            List<CompanyFundamental> list = new List<CompanyFundamental>();
+            list = SqlHelper.GetList<CompanyFundamental>(sql);
+            return list;
         }
 
     }

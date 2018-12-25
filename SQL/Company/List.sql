@@ -6,10 +6,10 @@ DECLARE @LastFundamentalDate date;
 DECLARE @CompanyIDs varchar(max);
 DECLARE @CategoryIDs varchar(max);
 declare @isBookMarkCategory bit;
-set @LastTradingDate  = '2017-12-29';
+--set @LastTradingDate  = '2017-12-29';
 --set @CompanyIDs = '71';
 --set @CategoryIDs = '1';
---set @LastFundamentalDate = '2018-11-18';
+--set @LastFundamentalDate = '2018-12-25';
 
 --{{PARAMS}}
 if isnull(@Name,'')!=''

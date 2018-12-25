@@ -37,13 +37,13 @@ function Company() {
         }
     }
 
-    this.startNSE = function(){
+    this.startNSE = function () {
         var symbols = '';
         for (var i = 0; i < self.company_json.length; i++) {
-            symbols += self.company_json[i].Symbol 
-            + '|' + formatDate($("#StartDate").val(),'DD-MM-YYYY')
-            + '|' + formatDate($("#EndDate").val(),'DD-MM-YYYY')
-            + '|' + 'EQ' + ',';
+            symbols += self.company_json[i].Symbol
+                + '|' + formatDate($("#StartDate").val(), 'DD-MM-YYYY')
+                + '|' + formatDate($("#EndDate").val(), 'DD-MM-YYYY')
+                + '|' + 'EQ' + ',';
         }
         if (symbols != '') {
             symbols = symbols.substring(0, symbols.length - 1);
@@ -318,6 +318,51 @@ $(function () {
             }).always(function () {
             });
         }
+    });
+
+    $("body").on("click", ".view-row", function () {
+        var $this = $(this);
+        var $tr = $this.parents("tr:first");
+        var companyId = $("#CompanyID", $tr).val();
+        var $modal = $("#modalView");
+        $modal.modal('show');
+        var $modalContent = $(".modal-content", $modal);
+        $modalContent.empty();
+        var url = apiUrl("/Company/FindCompanyFundamental?id=" + companyId);
+        $.ajax({
+            "url": url,
+            "cache": false,
+            "type": "GET"
+        }).done(function (json) {
+            var d = json[0];
+            d.rnd = Math.random() * 1000000 + 100;
+            $("#modal-company-template").tmpl(d).appendTo($modalContent);
+            google.charts.load('current', {
+                'packages': ['bar']
+            });
+            google.charts.setOnLoadCallback(function () {
+                var data = google.visualization.arrayToDataTable([
+                    ['', 'Sales Growth'],
+                    ['10 Years', d.SalesGrowth_10_Years],
+                    ['7 Years', d.SalesGrowth_7_Years],
+                    ['5 Years', d.SalesGrowth_5_Years],
+                    ['3 Years', d.SalesGrowth_3_Years],
+                    ['Current', d.SalesGrowth],
+                ]);
+
+                var options = {
+                    chart: {
+                        title: 'Company Performance',
+                        subtitle: 'Sales Growth',
+                    }
+                };
+
+                var chart = new google.charts.Bar(document.getElementById('columnchart_material_'+d.rnd));
+
+                chart.draw(data, google.charts.Bar.convertOptions(options));
+            });
+        }).always(function () {
+        });
     });
 
     $("body").on("click", "#lnkAddNew", function () {
