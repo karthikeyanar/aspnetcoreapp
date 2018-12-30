@@ -3,13 +3,15 @@ DECLARE @Name varchar(max);
 DECLARE @LastTradingDate date;
 DECLARE @CompanyID int;
 DECLARE @LastFundamentalDate date;
+DECLARE @LastMoneyControlDate date;
 DECLARE @CompanyIDs varchar(max);
 DECLARE @CategoryIDs varchar(max);
 declare @isBookMarkCategory bit;
 --set @LastTradingDate  = '2017-12-29';
 --set @CompanyIDs = '71';
 --set @CategoryIDs = '1';
---set @LastFundamentalDate = '2018-12-25';
+--set @LastFundamentalDate = '2018-12-26';
+set @LastMoneyControlDate = '2018-12-29';
 
 --{{PARAMS}}
 if isnull(@Name,'')!=''
@@ -78,10 +80,11 @@ and (c.CompanyID = @CompanyID or @CompanyID is null)
 and (c.[CompanyName] like @Name or isnull(@Name,'')='')
 and (tct.LastTradingDate is null or tct.LastTradingDate < @LastTradingDate or @LastTradingDate is null)
 and (cf.LastUpdatedDate is null or cf.LastUpdatedDate < @LastFundamentalDate or @LastFundamentalDate is null)
+and (c.LastMoneyControlDate is null or c.LastMoneyControlDate < @LastMoneyControlDate or @LastMoneyControlDate is null)
 and (tb.CompanyID > 0 or @isBookMarkCategory is null)
 and (tc.CompanyID > 0 or @CategoryIDs is null)
 
-select c.CompanyID,c.CompanyName,c.Symbol,c.IsBookMark,c.IsArchive,c.InvestingSymbol,c.InvestingUrl,tct.LastTradingDate 
+select c.CompanyID,c.CompanyName,c.Symbol,c.IsBookMark,c.IsArchive,c.InvestingSymbol,c.InvestingUrl,tct.LastTradingDate,c.MoneyControlSymbol,c.MoneyControlUrl 
 from Company c
 join @TempCompanyTable tct on tct.CompanyID = c.CompanyID 
 left outer join CompanyFundamental cf on cf.CompanyID = c.CompanyID
@@ -93,6 +96,7 @@ and (c.CompanyID = @CompanyID or @CompanyID is null)
 and (c.[CompanyName] like @Name or isnull(@Name,'')='')
 and (tct.LastTradingDate is null or tct.LastTradingDate < @LastTradingDate or @LastTradingDate is null)
 and (cf.LastUpdatedDate is null or cf.LastUpdatedDate < @LastFundamentalDate or @LastFundamentalDate is null)
+and (c.LastMoneyControlDate is null or c.LastMoneyControlDate < @LastMoneyControlDate or @LastMoneyControlDate is null)
 and (tb.CompanyID > 0 or @isBookMarkCategory is null)
 and (tc.CompanyID > 0 or @CategoryIDs is null)
 --{{ORDER_BY_START}}

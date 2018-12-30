@@ -25,6 +25,8 @@
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/exporting.js"></script>
     <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="~/js/accounting-0.2.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
 
     <div class="container">
         <div class="clearfix">&nbsp;</div>
@@ -157,7 +159,8 @@
                     $("#lblPiotroskiScore").html(ROOT.PiotroskiScore);
                     $("#lblGFactor").html(ROOT.GFactor);
                     $("#lblCurrentPrice").html(ROOT.CurrentPrice);
-                    $("#lbl52WeekHigh").html(ROOT.Week52High);
+                    var diff = ((cFloat(ROOT.CurrentPrice) - cFloat(ROOT.Week52High)) / cFloat(ROOT.Week52High)) * 100;
+                    $("#lbl52WeekHigh").html(ROOT.Week52High + '  ( ' + formatPercentage(diff) + ' )');
                     $("#lbl52WeekLow").html(ROOT.Week52Low);
                     $("#lnkScreener").attr('href','https://www.screener.in/company/'+ROOT.Symbol);
                     totalProfit();

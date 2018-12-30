@@ -1,0 +1,80 @@
+﻿@page
+@{
+    ViewData["Title"] = "";
+}
+<nav class="navbar navbar-light">
+  <form id="frmSearch" class="form-inline">
+    <a class="navbar-brand" href="#">Long Term</a>
+    <div style="margin-left:10px;float:left;">&nbsp;</div><input type="checkbox" id="chkIsBookMark">&nbsp;BookMark
+    <div style="margin-left:10px;float:left;">&nbsp;</div><input type="checkbox" id="chkIsArchive">&nbsp;Archive
+  </form>
+</nav>
+<div class="clearfix">&nbsp;</div>
+<table class="table table-hover table-fixed" id="tblCompany">
+  <thead>
+    <tr>
+      <th></th>
+      <th sortname="CompanyName">Name</th>
+      <th sortname="Symbol">Symbol</th>
+      <th sortname="Categories">Categories</th>
+      <th sortname="AvgYearProfit" class="text-right text-nowrap">Avg.Profit</th>
+      <th sortname="MutualFunds" class="text-right text-nowrap">Mutual Funds</th>
+      <th sortname="QualifiedForeignInvestors" class="text-right text-nowrap">Foreign</th>
+      <th sortname="TotalInvestors" class="text-right text-nowrap">Total Investors</th>
+      <th sortname="PositivePercentage" class="text-right text-nowrap">Positive %</th>
+      <th sortname="TotalYears" class="text-right text-nowrap">TotalYears</th>
+      <th sortname="Positive" class="text-right text-nowrap">Positive</th>
+      <th sortname="Negative" class="text-right text-nowrap">Negative</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+<div class="row">
+    <div class="col">
+        <div class="d-inline">
+            Rows
+        </div>
+        <div class="d-inline">
+            <select id="rows2" name="rows2" class="form-control d-inline form-control-sm" style="width:100px;">
+            </select>
+        </div>
+    </div>
+    <div class="col">
+        <div class="d-inline">
+            <span id="paging_status"></span>
+        </div>
+    </div>
+    <div class="col">
+        <div class="pull-right">
+          <nav aria-label="Page navigation example">
+              <ul class="manual-pagination pagination justify-content-end">
+              </ul>
+           </nav>
+        </div>
+    </div> 
+</div>
+@section scripts{
+ <script src="~/js/LongTerm.js" asp-append-version="true"></script>
+ <script type="text/html" id="grid-template">
+    {{each(i,row) rows}}
+    <tr id="tr${CompanyID}">
+        <td>
+            <i class="isbookmark-change fa {{if row.IsBookMark}}fa-star{{else}}fa-star-o{{/if}}" style="color:red;cursor:pointer;font-size:16px;"></i>
+            <input type="hidden" id="hdnCompanyID" value="${CompanyID}" />
+        </td>
+        <td><a href="/CompanyFundamental?id=${CompanyID}" target="_blank" style="color:#333;">${CompanyName}</a></td>
+        <td>${Symbol}</td>
+        <td>${Categories}</td>
+        <td class="text-nowrap text-right">${formatPercentage(AvgYearProfit)}</td>
+        <td class="text-nowrap text-right">${MutualFunds}</td>
+        <td class="text-nowrap text-right">${QualifiedForeignInvestors}</td>
+        <td class="text-nowrap text-right">${TotalInvestors}</td>
+        <td class="text-nowrap text-right">${formatPercentage(PositivePercentage)}</td>
+        <td class="text-nowrap text-right">${TotalYears}</td>
+        <td class="text-nowrap text-right">${Positive}</td>
+        <td class="text-nowrap text-right">${Negative}</td>
+    </tr>
+    {{/each}}
+</script> 
+}

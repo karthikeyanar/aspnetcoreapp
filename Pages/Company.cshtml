@@ -20,6 +20,11 @@
     <input type="hidden" name="screener_index" id="screener_index" value="" />
     <div id="screener_csv_log" style="font-size:50px;"></div>
 
+    <input type="hidden" name="moneycontrol_csv" id="moneycontrol_csv" value="" />
+    <input type="hidden" name="moneycontrol_total" id="moneycontrol_total" value="" />
+    <input type="hidden" name="moneycontrol_index" id="moneycontrol_index" value="" />
+    <div id="moneycontrol_csv_log" style="font-size:50px;"></div>
+
     <input type="hidden" id="CompanyIDs">
     &nbsp;&nbsp;&nbsp;&nbsp;
     <input type="hidden" id="CategoryIDs">
@@ -30,7 +35,7 @@
 
     <input type="text" name="EndDate" id="EndDate" class="form-control ml-2" placeholder="End Date" />
 
-    <div style="margin-left:10px;float:left;">&nbsp;</div><input type="checkbox" id="chkIsBookMarkCategory" checked>&nbsp;BookMark Category
+    <div style="margin-left:10px;float:left;">&nbsp;</div><input type="checkbox" id="chkIsBookMarkCategory">&nbsp;BookMark Category
 
     <button type="button" class="btn btn-info ml-2" id="lnkRefresh">Refresh</button>
     <button type="button" class="btn btn-success ml-2" id="lnkAddNew">Add</button>
@@ -40,6 +45,9 @@
     <button type="button" id="btnInvestingUpdateCSV" class="btn btn-danger btn-sm" style="display:none;">Investing CSV UPDATE</button>
     <button type="button" class="btn btn-danger ml-2" id="lnkScreenerDownload">Screener.Com</button>
     <button type="button" id="btnScreenerUpdateCSV" class="btn btn-danger btn-sm" style="display:none;">Screener CSV UPDATE</button>
+
+    <button type="button" class="btn btn-info ml-2" id="lnkMoneyControlDownload">Money Control</button>
+    <button type="button" id="btnMoneyControlUpdateCSV" class="btn btn-danger btn-sm" style="display:none;">MoneyControl CSV UPDATE</button>
   </form>
 </nav>
 <div class="clearfix">&nbsp;</div>
@@ -48,7 +56,8 @@
     <tr>
       <th sortname="CompanyName">Company</th>
       <th sortname="Symbol">Symbol</th>
-      <th sortname="InvestingUrl">Url</th>
+      <th sortname="MoneyControlSymbol">MC Symbol</th>
+      <th sortname="InvestingUrl">Investing Url</th>
       <th sortname="LastTradingDate">LastTradingDate</th>
       <th></th>
     </tr>
@@ -92,7 +101,8 @@
     {{each(i,row) rows}}
     <tr id="tr${CompanyID}">
         <td class="edit-row">${CompanyName}</td>
-        <td class="edit-row">${Symbol}</td>
+        <td>${Symbol}</td>
+        <td>${MoneyControlSymbol}</td>
         <td>${InvestingUrl}</td>
         <td>${formatDate(LastTradingDate)}</td>
         <td>
@@ -133,10 +143,18 @@
                     <label>Symbol</label>
                     <input type="text" class="form-control" name="Symbol" placeholder="Symbol" value="${Symbol}">
                     </div>
+                    <div class="form-group col">
+                    <label>Money Control Symbol</label>
+                    <input type="text" class="form-control" name="MoneyControlSymbol" placeholder="Money Control Symbol" value="${MoneyControlSymbol}">
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="inputAddress">Investing Url</label>
                     <input type="text" class="form-control" name="InvestingUrl" placeholder="Url" value="${InvestingUrl}">
+                </div>
+                <div class="form-group">
+                    <label for="inputAddress">Money Control Url</label>
+                    <input type="text" class="form-control" name="MoneyControlUrl" placeholder="Url" value="${MoneyControlUrl}">
                 </div>
                 <div class="form-group">
                     <div class="form-check form-check-inline">

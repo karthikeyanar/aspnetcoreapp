@@ -3,13 +3,19 @@ INSERT INTO [dbo].[Company]
 ,[Symbol]
 ,[IsBookMark]
 ,[IsArchive]
-,[InvestingUrl])
+,[InvestingUrl]
+,[MoneyControlSymbol]
+,[MoneyControlUrl]
+)
 VALUES
 (@CompanyName
 ,@Symbol
 ,@IsBookMark
 ,@IsArchive
-,@InvestingUrl)
+,@InvestingUrl
+,@MoneyControlSymbol
+,@MoneyControlUrl
+)
 
 
 

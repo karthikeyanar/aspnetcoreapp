@@ -97,6 +97,13 @@ namespace aspnetcoreapp.Helpers
                 return ConfigHelper.AppSetting("AppSettings", "RootPath");
             }
         }
+        public static string LogPath
+        {
+            get
+            {
+                return ConfigHelper.AppSetting("AppSettings", "LogPath");
+            }
+        }
         public static string ReplaceOrderBy(string sql, string orderby)
         {
             string string1 = "--{{ORDER_BY_START}}";
@@ -125,6 +132,13 @@ namespace aspnetcoreapp.Helpers
             {
                 return Convert.ToDateTime("01/01/1900");
             }
+        }
+
+        public static void Log(string content, string name)
+        {
+            content = DateTime.Now.ToString() + " :: " + content + Environment.NewLine;
+            string fileName = Helper.LogPath + "\\" + name + "_" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt";
+            System.IO.File.AppendAllText(fileName, content);
         }
     }
 

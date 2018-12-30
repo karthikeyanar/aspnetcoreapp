@@ -15,6 +15,7 @@ namespace aspnetcoreapp.Repository
     public interface ICompanyRepository
     {
         PaginatedListResult<CompanyModel> Get(SearchModel criteria);
+        PaginatedListResult<LongTermModel> LongTerm(SearchModel criteria);
         PaginatedListResult<CompanyModel> Save(CompanyModel model);
         void Delete(int id);
         void DeletePriceHistory(int id);
@@ -22,7 +23,8 @@ namespace aspnetcoreapp.Repository
         void UpdateCompanyHistory(int id);
         List<Select2List> FindCompanies(string term);
         PaginatedListResult<SplitCheckModel> GetSplitCheck(SearchModel criteria);
-        List<CompanyFundamental> FindCompanyFundamental(int id);
+        List<CompanyFundamentalModel> FindCompanyFundamental(int id);
+        List<ShareHoldingTypeModel> GetShareHoldingTypes();
     }
 
     public class CompanyRepository : ICompanyRepository
@@ -63,6 +65,46 @@ namespace aspnetcoreapp.Repository
             int totalRows = 0;
             list.rows = SqlHelper.GetList<CompanyModel>(sql, ref totalRows);
             list.total = totalRows;
+            return list;
+        }
+
+         public PaginatedListResult<LongTermModel> LongTerm(SearchModel criteria)
+        {
+            string sqlParams = string.Empty;
+            //sqlParams += string.Format("set @PageSize = {0};", criteria.PageSize);
+            //sqlParams += string.Format("set @PageIndex = {0};", criteria.PageIndex);
+            /*
+            if (criteria.CompanyID > 0)
+            {
+                sqlParams += string.Format("set @CompanyID = {0};", criteria.CompanyID);
+            }
+            if (string.IsNullOrEmpty(criteria.CompanyIDs) == false)
+            {
+                sqlParams += string.Format("set @CompanyIDs = '{0}';", criteria.CompanyIDs);
+            }
+            if (string.IsNullOrEmpty(criteria.CategoryIDs) == false)
+            {
+                sqlParams += string.Format("set @CategoryIDs = '{0}';", criteria.CategoryIDs);
+            }
+            if ((criteria.IsBookMarkCategory ?? false) == true)
+            {
+                sqlParams += string.Format("set @isBookMarkCategory = 1;");
+            }
+            if ((criteria.LastTradingDate ?? Helper.MinDateTime).Year > 1900)
+            {
+                sqlParams += string.Format("set @LastTradingDate = '{0}';", (criteria.LastTradingDate ?? Helper.MinDateTime).ToString("yyyy-MM-dd"));
+            }
+            */
+            string filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "Report", "LongTerm.sql");
+            string sql = System.IO.File.ReadAllText(filePath);
+            //string orderBy = " order by " + criteria.SortName + " " + criteria.SortOrder;
+            //sql = Helper.ReplaceOrderBy(sql, orderBy);
+            //sql = Helper.ReplaceParams(sql, sqlParams);
+            //sql = sql.Replace("\r\n"," ");
+            PaginatedListResult<LongTermModel> list = new PaginatedListResult<LongTermModel>();
+            //int totalRows = 0;
+            list.rows = SqlHelper.GetList<LongTermModel>(sql);
+            list.total = list.rows.Count();
             return list;
         }
 
@@ -164,7 +206,7 @@ namespace aspnetcoreapp.Repository
             SqlHelper.ExecuteNonQuery(sql, sqlParameterCollection);
         }
 
-        public List<CompanyFundamental> FindCompanyFundamental(int id)
+        public List<CompanyFundamentalModel> FindCompanyFundamental(int id)
         {
             string sqlParams = string.Empty;
             sqlParams += string.Format("set @CompanyID = {0};", id);
@@ -172,8 +214,16 @@ namespace aspnetcoreapp.Repository
             string sql = System.IO.File.ReadAllText(filePath);
             sql = Helper.ReplaceParams(sql, sqlParams);
             //sql = sql.Replace("\r\n"," ");
-            List<CompanyFundamental> list = new List<CompanyFundamental>();
-            list = SqlHelper.GetList<CompanyFundamental>(sql);
+            List<CompanyFundamentalModel> list = new List<CompanyFundamentalModel>();
+            list = SqlHelper.GetList<CompanyFundamentalModel>(sql);
+            return list;
+        }
+
+        public List<ShareHoldingTypeModel> GetShareHoldingTypes() {
+            string sql = "select * from ShareHoldingType";
+            //sql = sql.Replace("\r\n"," ");
+            List<ShareHoldingTypeModel> list = new List<ShareHoldingTypeModel>();
+            list = SqlHelper.GetList<ShareHoldingTypeModel>(sql);
             return list;
         }
 

@@ -28,18 +28,26 @@ namespace aspnetcoreapp.Controllers
         [HttpGet]
         public ActionResult<PaginatedListResult<CompanyModel>> List([FromQuery] SearchModel criteria)
         {
-            
+
             ICompanyRepository repository = new CompanyRepository();
             return repository.Get(criteria);
         }
 
         [HttpGet]
-        public ActionResult<List<CompanyFundamental>> FindCompanyFundamental([FromQuery] SearchModel criteria)
+        public ActionResult<PaginatedListResult<LongTermModel>> LongTerm([FromQuery] SearchModel criteria)
+        {
+
+            ICompanyRepository repository = new CompanyRepository();
+            return repository.LongTerm(criteria);
+        }
+
+        [HttpGet]
+        public ActionResult<List<CompanyFundamentalModel>> FindCompanyFundamental([FromQuery] SearchModel criteria)
         {
             ICompanyRepository repository = new CompanyRepository();
             return repository.FindCompanyFundamental((criteria.id ?? 0));
         }
- 
+
         [HttpPost]
         public ActionResult Save(CompanyModel model)
         {
@@ -109,9 +117,18 @@ namespace aspnetcoreapp.Controllers
         }
 
         [HttpPost]
+        public ActionResult UpdateBookMark(CompanyModel model)
+        {
+            string sql = string.Format("update company set isbookmark={0} where companyid={1}", (model.IsBookMark == true ? 1 : 0), model.CompanyID);
+            List<SqlParameter> sqlParameterCollection = new List<SqlParameter>();
+            SqlHelper.ExecuteNonQuery(sql, sqlParameterCollection);
+            return Ok();
+        }
+
+        [HttpPost]
         public ActionResult UpdateScreenerCSV(SearchModel model)
         {
-            CompanyFundamental cf = new CompanyFundamental();
+            CompanyFundamentalModel cf = new CompanyFundamentalModel();
             string csvContent = model.csv;
             string[] rows = csvContent.Split(("|").ToCharArray());
             foreach (string row in rows)
@@ -317,6 +334,64 @@ namespace aspnetcoreapp.Controllers
                 }
             }
             SqlHelper.ExecuteNonQuery(sql, sqlParameterCollection);
+            return Ok();
+        }
+
+        [HttpPost]
+        public ActionResult UpdateMoneyControlCSV(SearchModel model)
+        {
+            ICompanyRepository repository = new CompanyRepository();
+            List<ShareHoldingTypeModel> shareHoldingTypes = repository.GetShareHoldingTypes();
+            string csvContent = model.csv;
+            string[] rows = csvContent.Split((";").ToCharArray());
+            foreach (string row in rows)
+            {
+                CompanyShareHoldingModel holding = null;
+                string[] cells = row.Split(("|").ToCharArray());
+                if (cells.Length >= 3)
+                {
+                    ShareHoldingTypeModel type = (from q in shareHoldingTypes
+                                                  where q.ShareHoldingTypeName == cells[1]
+                                                  select q).FirstOrDefault();
+                    if (type == null)
+                    {
+                        Helper.Log("Holding type does not exist name=" + cells[1], "MoneyControlCSV");
+                    }
+                    if (type != null)
+                    {
+                        holding = new CompanyShareHoldingModel
+                        {
+                            CompanyID = DataTypeHelper.ToInt32(cells[0]),
+                            ShareHoldingTypeID = type.ShareHoldingTypeID,
+                            Total = DataTypeHelper.ToInt32(cells[2]),
+                            TotalShares = DataTypeHelper.ToInt32(cells[3])
+                        };
+
+                        string filePath = string.Empty;
+                        filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "Company", "CompanyShareHoldingSave.sql");
+                        string sql = System.IO.File.ReadAllText(filePath);
+                        List<SqlParameter> sqlParameterCollection = new List<SqlParameter>();
+                        PropertyInfo[] properties = holding.GetType().GetProperties();
+                        SqlParameter sqlp = null;
+                        List<String> ignoreProperties = new List<string>() { };
+                        foreach (var p in properties)
+                        {
+                            if (ignoreProperties.Contains(p.Name) == false)
+                            {
+                                sqlp = new SqlParameter();
+                                sqlp.ParameterName = p.Name;
+                                sqlp.Value = p.GetValue(holding);
+                                if (DataTypeHelper.ToDecimal(Convert.ToString(sqlp.Value)) == 0)
+                                {
+                                    sqlp.Value = 0;
+                                }
+                                sqlParameterCollection.Add(sqlp);
+                            }
+                        }
+                        SqlHelper.ExecuteNonQuery(sql, sqlParameterCollection);
+                    }
+                }
+            }
             return Ok();
         }
 

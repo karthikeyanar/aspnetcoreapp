@@ -73,6 +73,31 @@ function Company() {
         }
     }
 
+    this.startMoneyControl = function () {
+        console.log('self.index=', self.index);
+        var symbols = '';
+        for (var i = 0; i < self.company_json.length; i++) {
+            var c = self.company_json[i];
+            if (cString(c.MoneyControlSymbol) != ''
+                && cString(c.MoneyControlUrl) != '') {
+                var arr = c.MoneyControlUrl.split('/');
+                var name = arr[arr.length - 1];
+                var url = '/company-facts/' + name + '/shareholding-pattern/' + c.MoneyControlSymbol + '#' + c.MoneyControlSymbol;
+                symbols += c.CompanyID + '|' + url + ',';
+            }
+        }
+        if (symbols != '') {
+            symbols = symbols.substring(0, symbols.length - 1);
+        }
+        if (symbols != '') {
+            console.log('call gccmd', symbols);
+            var $gcb_cmd = $("#gcb_cmd");
+            $gcb_cmd.attr("cmd", "moneycontrol-history");
+            $gcb_cmd.attr("symbol", symbols);
+            $gcb_cmd.click();
+        }
+    }
+
     this.add = function (companyId) {
         if (companyId > 0) {
             var $tr = $("#tr" + companyId);
@@ -357,7 +382,7 @@ $(function () {
                     }
                 };
 
-                var chart = new google.charts.Bar(document.getElementById('columnchart_material_'+d.rnd));
+                var chart = new google.charts.Bar(document.getElementById('columnchart_material_' + d.rnd));
 
                 chart.draw(data, google.charts.Bar.convertOptions(options));
             });
@@ -449,6 +474,33 @@ $(function () {
         }).done(function (json) {
             var html = $("#nse_index").val() + ' of ' + $("#nse_total").val() + " - " + json.CompanyName;
             $("#nse_csv_log").html(html);
+            $tbl.flexReload2();
+        }).always(function () {
+        });
+    });
+
+
+    var $lnkMoneyControlDownload = $("#lnkMoneyControlDownload");
+
+    $lnkMoneyControlDownload.click(function () {
+        _COMPANY.startMoneyControl();
+    });
+
+    var $btnMoneyControlUpdateCSV = $("#btnMoneyControlUpdateCSV");
+    $btnMoneyControlUpdateCSV.click(function () {
+        var $moneycontrol_csv = $("#moneycontrol_csv");
+        console.log('moneycontrol_csv=', $moneycontrol_csv.val());
+        var url = apiUrl("/Company/UpdateMoneyControlCSV");
+        var d = { "csv": $moneycontrol_csv.val() };
+        $.ajax({
+            "url": url,
+            "cache": false,
+            "type": "POST",
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(d)
+        }).done(function (json) {
+            var html = $("#moneycontrol_index").val() + ' of ' + $("#moneycontrol_total").val() + " - " + json.CompanyName;
+            $("#moneycontrol_csv_log").html(html);
             $tbl.flexReload2();
         }).always(function () {
         });

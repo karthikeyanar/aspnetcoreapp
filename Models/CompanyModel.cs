@@ -12,12 +12,14 @@ namespace aspnetcoreapp.Models
         public bool? IsBookMark { get; set; }
         public bool? IsArchive { get; set; }
         public string InvestingUrl { get; set; }
+        public string MoneyControlSymbol { get; set; }
+        public string MoneyControlUrl { get; set; }
 
         public DateTime? LastTradingDate { get; set; }
     }
 
 
-    public class CompanyFundamental : CompanyModel
+    public class CompanyFundamentalModel : CompanyModel
     {
         public decimal? ROCE { get; set; }
         public decimal? StockPE { get; set; }
@@ -82,5 +84,36 @@ namespace aspnetcoreapp.Models
         public decimal? Profit_2016 { get; set; }
         public decimal? Profit_2017 { get; set; }
         public decimal? Profit_2018 { get; set; }
+    }
+
+    public class CompanyShareHoldingModel
+    {
+        public int CompanyID { get; set; }
+        public int ShareHoldingTypeID { get; set; }
+        public int? Total { get; set; }
+        public int? TotalShares { get; set; }
+    }
+
+    public class ShareHoldingTypeModel
+    {
+        public int ShareHoldingTypeID { get; set; }
+        public string ShareHoldingTypeName { get; set; }
+    }
+
+    public class LongTermModel
+    {
+        public int CompanyID { get; set; }
+        public string CompanyName { get; set; }
+        public string Symbol { get; set; }
+        public string Categories { get; set; }
+        public decimal? AvgYearProfit {get;set;}
+        public int? MutualFunds { get; set; }
+        public int? QualifiedForeignInvestors {get;set;}
+        public int? TotalInvestors { get; set; }
+        public decimal? PositivePercentage { get; set; }
+        public int? TotalYears { get; set; }
+        public int? Positive { get; set; }
+        public int? Negative { get; set; }
+        public bool? IsBookMark {get;set;}
     }
 }

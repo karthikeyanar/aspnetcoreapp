@@ -4,6 +4,8 @@ UPDATE [dbo].[Company]
       ,[IsBookMark] = @IsBookMark
       ,[IsArchive] = @IsArchive
       ,[InvestingUrl] = @InvestingUrl
+	  ,[MoneyControlSymbol] = @MoneyControlSymbol
+	  ,[MoneyControlUrl] = @MoneyControlUrl
  WHERE [CompanyID] = @CompanyID
 
 
