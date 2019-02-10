@@ -18,6 +18,26 @@ namespace aspnetcoreapp.Models
         public DateTime? LastTradingDate { get; set; }
     }
 
+    public class CompanyPriceAverageModel: CompanyModel
+    {
+        public decimal? CurrentPrice { get; set; }
+        public decimal? MA5 { get; set; }
+        public decimal? MA10 { get; set; }
+        public decimal? MA20 { get; set; }
+        public decimal? MA50 { get; set; }
+        public decimal? MA100 { get; set; }
+        public decimal? MA200 { get; set; }
+
+        public bool? IsBuy_MA5 { get; set; }
+        public bool? IsBuy_MA10 { get; set; }
+        public bool? IsBuy_MA20 { get; set; }
+        public bool? IsBuy_MA50 { get; set; }
+        public bool? IsBuy_MA100 { get; set; }
+        public bool? IsBuy_MA200 { get; set; }
+
+        public DateTime? LastUpdatedDate {get;set;}
+    }
+
 
     public class CompanyFundamentalModel : CompanyModel
     {
@@ -66,6 +86,10 @@ namespace aspnetcoreapp.Models
         public decimal? PS { get; set; }
         public decimal? PB { get; set; }
         public DateTime? LastUpdatedDate { get; set; }
+        public string QuaterProfits { get; set; }
+        public string YearProfits { get; set; }
+        public string QuaterSales { get; set; }
+        public string YearSales { get; set; }
 
 
         //Others
@@ -106,14 +130,15 @@ namespace aspnetcoreapp.Models
         public string CompanyName { get; set; }
         public string Symbol { get; set; }
         public string Categories { get; set; }
-        public decimal? AvgYearProfit {get;set;}
+        public decimal? AvgYearProfit { get; set; }
         public int? MutualFunds { get; set; }
-        public int? QualifiedForeignInvestors {get;set;}
+        public int? QualifiedForeignInvestors { get; set; }
         public int? TotalInvestors { get; set; }
         public decimal? PositivePercentage { get; set; }
         public int? TotalYears { get; set; }
         public int? Positive { get; set; }
         public int? Negative { get; set; }
-        public bool? IsBookMark {get;set;}
+        public bool? IsBookMark { get; set; }
+        public decimal? PEG { get; set; }
     }
 }

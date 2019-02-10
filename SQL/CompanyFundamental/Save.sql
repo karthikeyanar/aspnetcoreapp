@@ -49,6 +49,10 @@ IF @count = 0
            ,[GFactor]
            ,[PS]
            ,[PB]
+		   ,[QuaterProfits]
+		   ,[YearProfits]
+		   ,[QuaterSales]
+		   ,[YearSales]
            ,[LastUpdatedDate])
 		VALUES
            (@CompanyID
@@ -96,6 +100,10 @@ IF @count = 0
            ,@GFactor
            ,@PS
            ,@PB
+		   ,@QuaterProfits
+		   ,@YearProfits
+		   ,@QuaterSales
+		   ,@YearSales
            ,GETDATE())
 	END
 ELSE
@@ -146,6 +154,10 @@ ELSE
 			  ,[GFactor] = @GFactor
 			  ,[PS] = @PS
 			  ,[PB] = @PB
+			  ,[QuaterProfits] = @QuaterProfits
+			  ,[YearProfits] = @YearProfits
+			  ,[QuaterSales] = @QuaterSales
+			  ,[YearSales] = @YearSales
 			  ,[LastUpdatedDate] = GETDATE()
 		 WHERE [CompanyID] = @CompanyID
 	END

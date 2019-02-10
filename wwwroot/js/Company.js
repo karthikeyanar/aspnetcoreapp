@@ -11,7 +11,7 @@ function Company() {
         for (var i = 0; i < self.company_json.length; i++) {
             var c = self.company_json[i];
             if (cString(c.LastTradingDate) == '') {
-                c.LastTradingDate = '01/01/2007';
+                c.LastTradingDate = '01/01/2017';
             }
             if (cString(c.InvestingUrl) != '') {
                 if (c.InvestingUrl.indexOf('?cid=') > -1) {
@@ -32,6 +32,38 @@ function Company() {
             console.log('call gccmd', symbols);
             var $gcb_cmd = $("#gcb_cmd");
             $gcb_cmd.attr("cmd", "investing-history");
+            $gcb_cmd.attr("symbol", symbols);
+            $gcb_cmd.click();
+        }
+    }
+
+    this.startTechnical = function () {
+        console.log('self.index=', self.index);
+        var symbols = '';
+        for (var i = 0; i < self.company_json.length; i++) {
+            var c = self.company_json[i];
+            if (cString(c.LastTradingDate) == '') {
+                c.LastTradingDate = '01/01/2017';
+            }
+            if (cString(c.InvestingUrl) != '') {
+                if (c.InvestingUrl.indexOf('?cid=') > -1) {
+                    var arr = c.InvestingUrl.split('?cid=');
+                    //console.log(arr);
+                    c.InvestingUrl = arr[0] + '-technical' + '?cid=' + arr[1];
+                } else {
+                    c.InvestingUrl = c.InvestingUrl + '-technical';
+                }
+                symbols += c.CompanyID + '|' + c.InvestingUrl + '|' + formatDate(c.LastTradingDate, 'DD/MM/YYYY') + '|' + formatDate(new Date(), 'DD/MM/YYYY') + ',';
+            }
+        }
+        if (symbols != '') {
+            symbols = symbols.substring(0, symbols.length - 1);
+        }
+        console.log(symbols);
+        if (symbols != '') {
+            console.log('call gccmd', symbols);
+            var $gcb_cmd = $("#gcb_cmd");
+            $gcb_cmd.attr("cmd", "technical-history");
             $gcb_cmd.attr("symbol", symbols);
             $gcb_cmd.click();
         }
@@ -294,6 +326,32 @@ $(function () {
         }).done(function (json) {
             var html = $("#investing_index").val() + ' of ' + $("#investing_total").val() + " - " + json.CompanyName;
             $("#investing_csv_log").html(html);
+            $tbl.flexReload2();
+        }).always(function () {
+        });
+    });
+
+    var $lnkTechnicalDownload = $("#lnkTechnicalDownload");
+
+    $lnkTechnicalDownload.click(function () {
+        _COMPANY.startTechnical();
+    });
+
+    var $btnTechnicalUpdateCSV = $("#btnTechnicalUpdateCSV");
+    $btnTechnicalUpdateCSV.click(function () {
+        var $technical_csv = $("#technical_csv");
+        console.log('technical_csv=', $technical_csv.val());
+        var url = apiUrl("/Company/UpdateTechnical");
+        var d = { "csv": $technical_csv.val() };
+        $.ajax({
+            "url": url,
+            "cache": false,
+            "type": "POST",
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(d)
+        }).done(function (json) {
+            var html = $("#technical_index").val() + ' of ' + $("#technical_total").val() + " - " + json.CompanyName;
+            $("#technical_csv_log").html(html);
             $tbl.flexReload2();
         }).always(function () {
         });

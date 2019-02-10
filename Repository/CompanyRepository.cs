@@ -25,6 +25,7 @@ namespace aspnetcoreapp.Repository
         PaginatedListResult<SplitCheckModel> GetSplitCheck(SearchModel criteria);
         List<CompanyFundamentalModel> FindCompanyFundamental(int id);
         List<ShareHoldingTypeModel> GetShareHoldingTypes();
+        PaginatedListResult<CompanyPriceAverageModel> AverageList(SearchModel criteria);
     }
 
     public class CompanyRepository : ICompanyRepository
@@ -68,12 +69,11 @@ namespace aspnetcoreapp.Repository
             return list;
         }
 
-         public PaginatedListResult<LongTermModel> LongTerm(SearchModel criteria)
+        public PaginatedListResult<CompanyPriceAverageModel> AverageList(SearchModel criteria)
         {
             string sqlParams = string.Empty;
-            //sqlParams += string.Format("set @PageSize = {0};", criteria.PageSize);
-            //sqlParams += string.Format("set @PageIndex = {0};", criteria.PageIndex);
-            /*
+            sqlParams += string.Format("set @PageSize = {0};", criteria.PageSize);
+            sqlParams += string.Format("set @PageIndex = {0};", criteria.PageIndex);
             if (criteria.CompanyID > 0)
             {
                 sqlParams += string.Format("set @CompanyID = {0};", criteria.CompanyID);
@@ -94,17 +94,39 @@ namespace aspnetcoreapp.Repository
             {
                 sqlParams += string.Format("set @LastTradingDate = '{0}';", (criteria.LastTradingDate ?? Helper.MinDateTime).ToString("yyyy-MM-dd"));
             }
-            */
+            string filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "CompanyPriceAverage", "List.sql");
+            string sql = System.IO.File.ReadAllText(filePath);
+            string orderBy = " order by " + criteria.SortName + " " + criteria.SortOrder;
+            sql = Helper.ReplaceOrderBy(sql, orderBy);
+            sql = Helper.ReplaceParams(sql, sqlParams);
+            //sql = sql.Replace("\r\n"," ");
+            PaginatedListResult<CompanyPriceAverageModel> list = new PaginatedListResult<CompanyPriceAverageModel>();
+            int totalRows = 0;
+            list.rows = SqlHelper.GetList<CompanyPriceAverageModel>(sql, ref totalRows);
+            list.total = totalRows;
+            return list;
+        }
+
+         public PaginatedListResult<LongTermModel> LongTerm(SearchModel criteria)
+        {
+            string sqlParams = string.Empty;
+            sqlParams += string.Format("set @PageSize = {0};", criteria.PageSize);
+            sqlParams += string.Format("set @PageIndex = {0};", criteria.PageIndex);
+            if ((criteria.IsBookMark ?? false) == true)
+            {
+                sqlParams += string.Format("set @IsBookMark = 1;");
+            } 
             string filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "Report", "LongTerm.sql");
             string sql = System.IO.File.ReadAllText(filePath);
             //string orderBy = " order by " + criteria.SortName + " " + criteria.SortOrder;
             //sql = Helper.ReplaceOrderBy(sql, orderBy);
-            //sql = Helper.ReplaceParams(sql, sqlParams);
+            sql = Helper.ReplaceParams(sql, sqlParams);
             //sql = sql.Replace("\r\n"," ");
             PaginatedListResult<LongTermModel> list = new PaginatedListResult<LongTermModel>();
-            //int totalRows = 0;
-            list.rows = SqlHelper.GetList<LongTermModel>(sql);
-            list.total = list.rows.Count();
+            int totalRows = 0;
+            Helper.Log(sql,"LongTerm");
+            list.rows = SqlHelper.GetList<LongTermModel>(sql, ref totalRows);
+            list.total = totalRows;
             return list;
         }
 

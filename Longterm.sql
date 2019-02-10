@@ -1,4 +1,4 @@
-DECLARE @PageSize INT = 2000, @PageIndex INT = 1;
+DECLARE @PageSize INT = 30, @PageIndex INT = 1;
 
 select * from (
 select 
@@ -6,7 +6,9 @@ tbl.*
 ,case when totalyears > 0 then cast(((cast(Positive as float) / cast(TotalYears as float))*100) as float) else 0 end as PositivePercentage
 from (
 select 
-c.CompanyName
+c.CompanyID 
+,isnull(c.IsBookMark,0) as IsBookMark
+,c.CompanyName
 ,c.Symbol 
 ,c.MoneyControlSymbol 
 ,(SELECT SUBSTRING((
@@ -16,6 +18,7 @@ join Category cat on cc.CategoryID = cat.CategoryID
 where cc.CompanyID = c.CompanyID
 FOR XML PATH('')
 ),3,200000)) as Categories
+,cf.PEG
 ,(select sum(isnull(Total,0)) from CompanyShareHolding csh where csh.CompanyID = c.CompanyID) as TotalInvestors
 ,(select sum(isnull(Total,0)) from CompanyShareHolding csh where csh.CompanyID = c.CompanyID and csh.ShareHoldingTypeID = 1) as MutualFunds
 ,(select sum(isnull(Total,0)) from CompanyShareHolding csh where csh.CompanyID = c.CompanyID and csh.ShareHoldingTypeID = 8) as QualifiedForeignInvestors
@@ -24,6 +27,7 @@ FOR XML PATH('')
 ,cf.DividendYield
 ,cf.ROE_3_Years 
 ,cf.Week52High
+,cf.MarketCapital 
 ,(select top 1 isnull([close],0) from companypricehistory where companyid = c.companyid order by [date] desc) as CurrentPrice
 ,(select AVG(isnull(dyph.Percentage,0)) from dm_year_period_history dyph
 join dm_year_period yp on yp.dm_year_period_id = dyph.dm_year_period_id and yp.Year > 2008
@@ -67,27 +71,32 @@ where dyph.CompanyID = c.CompanyID),0) as Profit_2010
 ,isnull((select isnull(dyph.Percentage,0) from dm_year_period_history dyph
 join dm_year_period yp on yp.dm_year_period_id = dyph.dm_year_period_id and yp.Year = 2009
 where dyph.CompanyID = c.CompanyID),0) as Profit_2009
---,isnull((select isnull(dyph.Percentage,0) from dm_year_period_history dyph
---join dm_year_period yp on yp.dm_year_period_id = dyph.dm_year_period_id and yp.Year = 2008
---where dyph.CompanyID = c.CompanyID),0) as Profit_2008
---,isnull((select isnull(dyph.Percentage,0) from dm_year_period_history dyph
---join dm_year_period yp on yp.dm_year_period_id = dyph.dm_year_period_id and yp.Year = 2007
---where dyph.CompanyID = c.CompanyID),0) as Profit_2007
+,isnull((select isnull(dyph.Percentage,0) from dm_year_period_history dyph
+join dm_year_period yp on yp.dm_year_period_id = dyph.dm_year_period_id and yp.Year = 2008
+where dyph.CompanyID = c.CompanyID),0) as Profit_2008
+,isnull((select isnull(dyph.Percentage,0) from dm_year_period_history dyph
+join dm_year_period yp on yp.dm_year_period_id = dyph.dm_year_period_id and yp.Year = 2007
+where dyph.CompanyID = c.CompanyID),0) as Profit_2007
 from Company c
 join companyfundamental cf on cf.companyid = c.companyid
+--where c.IsBookMark = 1
 --where c.Symbol in ('BATA','TITAN','ADANIPOWER')
 --where c.symbol like '%GRA%'
 ) as tbl 
 --where TotalYears > 0
 ) as tbl2 
-where PositivePercentage >= 70 
+where 
+TotalYears >= 10
+and Positive >= 8
+and CurrentPrice <= 15000
+--PositivePercentage >= 70 
 --and PiotroskiScore >= 7
 order by 
---QualifiedForeignInvestors desc,
-MutualFunds desc,
---TotalInvestors desc,
+MarketCapital desc,
 PositivePercentage desc,
---MutualFunds desc,
+TotalYears desc,
+MutualFunds desc,
+TotalInvestors desc,
 PiotroskiScore desc
 OFFSET (@PageIndex-1)*@PageSize ROWS FETCH NEXT @PageSize ROWS ONLY
 
@@ -103,8 +112,9 @@ AVG(AvgYearProfit) as AvgYearProfit
 ,AVG(Profit_2011) as Profit_2011
 ,AVG(Profit_2010) as Profit_2010
 ,AVG(Profit_2009) as Profit_2009
---,AVG(Profit_2008) as Profit_2008
---,AVG(Profit_2007) as Profit_2007
+,count(*) as cnt
+,AVG(Profit_2008) as Profit_2008
+,AVG(Profit_2007) as Profit_2007
 from (
 select 
 tbl.* 
@@ -114,9 +124,11 @@ select
 c.CompanyName
 ,c.Symbol 
 ,cf.PiotroskiScore
+,cf.MarketCapital 
 ,(select sum(isnull(Total,0)) from CompanyShareHolding csh where csh.CompanyID = c.CompanyID) as TotalInvestors
 ,(select sum(isnull(Total,0)) from CompanyShareHolding csh where csh.CompanyID = c.CompanyID and csh.ShareHoldingTypeID = 1) as MutualFunds
 ,(select sum(isnull(Total,0)) from CompanyShareHolding csh where csh.CompanyID = c.CompanyID and csh.ShareHoldingTypeID = 8) as QualifiedForeignInvestors
+,(select top 1 isnull([close],0) from companypricehistory where companyid = c.companyid order by [date] desc) as CurrentPrice
 ,(select AVG(isnull(dyph.Percentage,0)) from dm_year_period_history dyph
 join dm_year_period yp on yp.dm_year_period_id = dyph.dm_year_period_id and yp.Year > 2008
 where dyph.CompanyID = c.CompanyID) as AvgYearProfit
@@ -159,26 +171,31 @@ where dyph.CompanyID = c.CompanyID),0) as Profit_2010
 ,isnull((select isnull(dyph.Percentage,0) from dm_year_period_history dyph
 join dm_year_period yp on yp.dm_year_period_id = dyph.dm_year_period_id and yp.Year = 2009
 where dyph.CompanyID = c.CompanyID),0) as Profit_2009
---,isnull((select isnull(dyph.Percentage,0) from dm_year_period_history dyph
---join dm_year_period yp on yp.dm_year_period_id = dyph.dm_year_period_id and yp.Year = 2008
---where dyph.CompanyID = c.CompanyID),0) as Profit_2008
---,isnull((select isnull(dyph.Percentage,0) from dm_year_period_history dyph
---join dm_year_period yp on yp.dm_year_period_id = dyph.dm_year_period_id and yp.Year = 2007
---where dyph.CompanyID = c.CompanyID),0) as Profit_2007
+,isnull((select isnull(dyph.Percentage,0) from dm_year_period_history dyph
+join dm_year_period yp on yp.dm_year_period_id = dyph.dm_year_period_id and yp.Year = 2008
+where dyph.CompanyID = c.CompanyID),0) as Profit_2008
+,isnull((select isnull(dyph.Percentage,0) from dm_year_period_history dyph
+join dm_year_period yp on yp.dm_year_period_id = dyph.dm_year_period_id and yp.Year = 2007
+where dyph.CompanyID = c.CompanyID),0) as Profit_2007
 from Company c
 join companyfundamental cf on cf.companyid = c.companyid
---where c.Symbol in ('BATA')
+--where c.IsBookMark = 1
 ) as tbl 
---where TotalYears > 0
+where 
+TotalYears >= 10
+and Positive >= 9
+and CurrentPrice <= 15000
+--PositivePercentage >= 70 
+--and PiotroskiScore >= 7
 order by 
---QualifiedForeignInvestors desc,
-MutualFunds desc,
---TotalInvestors desc,
+MarketCapital desc,
 PositivePercentage desc,
---MutualFunds desc,
+TotalYears desc,
+MutualFunds desc,
+TotalInvestors desc,
 PiotroskiScore desc
 OFFSET (@PageIndex-1)*@PageSize ROWS FETCH NEXT @PageSize ROWS ONLY
 ) as tbl2 
-where PositivePercentage >= 70 
+--where PositivePercentage >= 70 
 --and PiotroskiScore >= 7
 go

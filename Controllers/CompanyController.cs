@@ -34,6 +34,14 @@ namespace aspnetcoreapp.Controllers
         }
 
         [HttpGet]
+        public ActionResult<PaginatedListResult<CompanyPriceAverageModel>> AverageList([FromQuery] SearchModel criteria)
+        {
+
+            ICompanyRepository repository = new CompanyRepository();
+            return repository.AverageList(criteria);
+        }
+
+        [HttpGet]
         public ActionResult<PaginatedListResult<LongTermModel>> LongTerm([FromQuery] SearchModel criteria)
         {
 
@@ -311,6 +319,22 @@ namespace aspnetcoreapp.Controllers
                 {
                     cf.NetProfit_Year_3 = DataTypeHelper.ToDecimal(cells[1]);
                 }
+                else if (cells[0].Contains("quater_profit"))
+                {
+                    cf.QuaterProfits = cells[1];
+                }
+                else if (cells[0].Contains("year_profit"))
+                {
+                    cf.YearProfits = cells[1];
+                }
+                else if (cells[0].Contains("quater_sales"))
+                {
+                    cf.QuaterSales = cells[1];
+                }
+                else if (cells[0].Contains("year_sales"))
+                {
+                    cf.YearSales = cells[1];
+                }
             }
             string filePath = string.Empty;
             filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "CompanyFundamental", "Save.sql");
@@ -326,9 +350,20 @@ namespace aspnetcoreapp.Controllers
                     sqlp = new SqlParameter();
                     sqlp.ParameterName = p.Name;
                     sqlp.Value = p.GetValue(cf);
-                    if (DataTypeHelper.ToDecimal(Convert.ToString(sqlp.Value)) == 0)
+                    if (p.Name != "QuaterProfits" && p.Name != "YearProfits"
+                    && p.Name != "QuaterSales" && p.Name != "YearSales")
                     {
-                        sqlp.Value = 0;
+                        if (DataTypeHelper.ToDecimal(Convert.ToString(sqlp.Value)) == 0)
+                        {
+                            sqlp.Value = 0;
+                        }
+                    }
+                    else
+                    {
+                        if (Convert.ToString(sqlp.Value) == "")
+                        {
+                            sqlp.Value = "";
+                        }
                     }
                     sqlParameterCollection.Add(sqlp);
                 }
@@ -396,6 +431,151 @@ namespace aspnetcoreapp.Controllers
         }
 
         [HttpPost]
+        public ActionResult UpdateTechnical(SearchModel model)
+        {
+            string csvContent = model.csv;
+            string[] arr = csvContent.Split(("^").ToCharArray());
+            CompanyPriceAverageModel avgModel = new CompanyPriceAverageModel
+            {
+                CompanyID = DataTypeHelper.ToInt32(arr[0]),
+                CurrentPrice = DataTypeHelper.ToDecimal(arr[1]),
+            };
+            string[] rows = arr[2].Split(("~").ToCharArray());
+            foreach (string row in rows)
+            {
+                string[] cells = row.Split(("|").ToCharArray());
+                bool? isBuy = false;
+
+                if (cells[1].Contains("Buy"))
+                {
+                    isBuy = true;
+                }
+                cells[1] = cells[1].Replace("Sell", "").Replace("Buy", "").Replace(" ", "");
+                decimal? value = DataTypeHelper.ToDecimal(cells[1]);
+                switch (cells[0])
+                {
+                    case "MA5":
+                        avgModel.IsBuy_MA5 = isBuy;
+                        avgModel.MA5 = value;
+                        break;
+                    case "MA10":
+                        avgModel.IsBuy_MA10 = isBuy;
+                        avgModel.MA10 = value;
+                        break;
+                    case "MA20":
+                        avgModel.IsBuy_MA20 = isBuy;
+                        avgModel.MA20 = value;
+                        break;
+                    case "MA50":
+                        avgModel.IsBuy_MA50 = isBuy;
+                        avgModel.MA50 = value;
+                        break;
+                    case "MA100":
+                        avgModel.IsBuy_MA100 = isBuy;
+                        avgModel.MA100 = value;
+                        break;
+                    case "MA200":
+                        avgModel.IsBuy_MA200 = isBuy;
+                        avgModel.MA200 = value;
+                        break;
+                }
+            }
+            string filePath = string.Empty;
+            filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "CompanyPriceAverage", "Save.sql");
+            string sql = "";
+            sql = System.IO.File.ReadAllText(filePath);
+            string connectionString = Helper.ConnectionString;
+            SqlParameter sqlp = null;
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    SqlCommand command = new SqlCommand(sql, connection);
+                    sqlp = new SqlParameter();
+                    sqlp.ParameterName = "CompanyID";
+                    sqlp.Value = avgModel.CompanyID;
+                    command.Parameters.Add(sqlp);
+
+                    sqlp = new SqlParameter();
+                    sqlp.ParameterName = "CurrentPrice";
+                    sqlp.Value = avgModel.CurrentPrice;
+                    command.Parameters.Add(sqlp);
+
+                    sqlp = new SqlParameter();
+                    sqlp.ParameterName = "MA5";
+                    sqlp.Value = (avgModel.MA5 ?? 0);
+                    command.Parameters.Add(sqlp);
+
+                    sqlp = new SqlParameter();
+                    sqlp.ParameterName = "IsBuy_MA5";
+                    sqlp.Value = (avgModel.IsBuy_MA5 ?? false);
+                    command.Parameters.Add(sqlp);
+
+                    sqlp = new SqlParameter();
+                    sqlp.ParameterName = "MA10";
+                    sqlp.Value = (avgModel.MA10 ?? 0);
+                    command.Parameters.Add(sqlp);
+
+                    sqlp = new SqlParameter();
+                    sqlp.ParameterName = "IsBuy_MA10";
+                    sqlp.Value = (avgModel.IsBuy_MA10 ?? false);
+                    command.Parameters.Add(sqlp);
+
+                    sqlp = new SqlParameter();
+                    sqlp.ParameterName = "MA20";
+                    sqlp.Value = (avgModel.MA20 ?? 0);
+                    command.Parameters.Add(sqlp);
+
+                    sqlp = new SqlParameter();
+                    sqlp.ParameterName = "IsBuy_MA20";
+                    sqlp.Value = (avgModel.IsBuy_MA20 ?? false);
+                    command.Parameters.Add(sqlp);
+
+                    sqlp = new SqlParameter();
+                    sqlp.ParameterName = "MA50";
+                    sqlp.Value = (avgModel.MA50 ?? 0);
+                    command.Parameters.Add(sqlp);
+
+                    sqlp = new SqlParameter();
+                    sqlp.ParameterName = "IsBuy_MA50";
+                    sqlp.Value = (avgModel.IsBuy_MA50 ?? false);
+                    command.Parameters.Add(sqlp);
+
+                    sqlp = new SqlParameter();
+                    sqlp.ParameterName = "MA100";
+                    sqlp.Value = (avgModel.MA100 ?? 0);
+                    command.Parameters.Add(sqlp);
+
+                    sqlp = new SqlParameter();
+                    sqlp.ParameterName = "IsBuy_MA100";
+                    sqlp.Value = (avgModel.IsBuy_MA100 ?? false);
+                    command.Parameters.Add(sqlp);
+
+                    sqlp = new SqlParameter();
+                    sqlp.ParameterName = "MA200";
+                    sqlp.Value = (avgModel.MA200 ?? 0);
+                    command.Parameters.Add(sqlp);
+
+                    sqlp = new SqlParameter();
+                    sqlp.ParameterName = "IsBuy_MA200";
+                    sqlp.Value = (avgModel.IsBuy_MA200 ?? false);
+                    command.Parameters.Add(sqlp);
+
+                    command.Connection.Open();
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.ToString().Contains("PRIMARY KEY") == false)
+                {
+                    return BadRequest(ex.Message);
+                }
+            }
+            return Ok();
+        }
+
+        [HttpPost]
         public ActionResult UpdateCSV(SearchModel model)
         {
             string csvContent = model.csv.Replace("|", Environment.NewLine);
@@ -456,36 +636,12 @@ namespace aspnetcoreapp.Controllers
                             orderby q.Date ascending
                             select q).ToList();
 
+            string filePath = string.Empty;
+            filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "Company", "CompanyPriceHistorySave.sql");
             foreach (var price in priceHistory)
             {
                 string sql = "";
-                sql = "INSERT INTO [dbo].[CompanyPriceHistory]" + Environment.NewLine +
-                " ([CompanyID]" + Environment.NewLine +
-                ",[Date]" + Environment.NewLine +
-                ",[Open]" + Environment.NewLine +
-                ",[Low]" + Environment.NewLine +
-                ",[High]" + Environment.NewLine +
-                ",[Close]" + Environment.NewLine +
-                ",[PrevClose]" + Environment.NewLine +
-                ",[OriginalOpen]" + Environment.NewLine +
-                ",[OriginalLow]" + Environment.NewLine +
-                ",[OriginalHigh]" + Environment.NewLine +
-                ",[OriginalClose]" + Environment.NewLine +
-                ",[OriginalPrevClose]" + Environment.NewLine +
-               " ) VALUES (" + Environment.NewLine +
-               "@companyID" + Environment.NewLine +
-               ",@date" + Environment.NewLine +
-               ",@open" + Environment.NewLine +
-               ",@low" + Environment.NewLine +
-               ",@high" + Environment.NewLine +
-               ",@close" + Environment.NewLine +
-               ",@prevclose" + Environment.NewLine +
-               ",@open" + Environment.NewLine +
-               ",@low" + Environment.NewLine +
-               ",@high" + Environment.NewLine +
-               ",@close" + Environment.NewLine +
-               ",@prevclose" + Environment.NewLine +
-               ")";
+                sql = System.IO.File.ReadAllText(filePath);
                 //Console.WriteLine("dt=" + dt.ToString("MM/dd/yyyy"));
                 try
                 {

@@ -6,7 +6,6 @@
   <form id="frmSearch" class="form-inline">
     <a class="navbar-brand" href="#">Long Term</a>
     <div style="margin-left:10px;float:left;">&nbsp;</div><input type="checkbox" id="chkIsBookMark">&nbsp;BookMark
-    <div style="margin-left:10px;float:left;">&nbsp;</div><input type="checkbox" id="chkIsArchive">&nbsp;Archive
   </form>
 </nav>
 <div class="clearfix">&nbsp;</div>
@@ -17,6 +16,7 @@
       <th sortname="CompanyName">Name</th>
       <th sortname="Symbol">Symbol</th>
       <th sortname="Categories">Categories</th>
+      <th sortname="PEG" class="text-right text-nowrap">PEG</th>
       <th sortname="AvgYearProfit" class="text-right text-nowrap">Avg.Profit</th>
       <th sortname="MutualFunds" class="text-right text-nowrap">Mutual Funds</th>
       <th sortname="QualifiedForeignInvestors" class="text-right text-nowrap">Foreign</th>
@@ -66,6 +66,7 @@
         <td><a href="/CompanyFundamental?id=${CompanyID}" target="_blank" style="color:#333;">${CompanyName}</a></td>
         <td>${Symbol}</td>
         <td>${Categories}</td>
+        <td class="text-nowrap text-right">${PEG}</td>
         <td class="text-nowrap text-right">${formatPercentage(AvgYearProfit)}</td>
         <td class="text-nowrap text-right">${MutualFunds}</td>
         <td class="text-nowrap text-right">${QualifiedForeignInvestors}</td>

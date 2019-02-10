@@ -2,8 +2,6 @@ DECLARE @PageSize INT = 10, @PageIndex INT = 1;
 DECLARE @Name varchar(max);
 DECLARE @LastTradingDate date;
 DECLARE @CompanyID int;
-DECLARE @LastFundamentalDate date;
-DECLARE @LastMoneyControlDate date;
 DECLARE @CompanyIDs varchar(max);
 DECLARE @CategoryIDs varchar(max);
 declare @isBookMarkCategory bit;
@@ -21,12 +19,10 @@ if isnull(@Name,'')!=''
 
 declare @TempBookMarkTable table(CompanyID int,IsBookMark bit)
 
-declare @TempCompanyTable table(CompanyID int,LastTradingDate datetime)
+declare @TempCompanyTable table(CompanyID int)
 
-insert into @TempCompanyTable(CompanyID,LastTradingDate)
+insert into @TempCompanyTable(CompanyID)
 select c.CompanyID
-,c.LastTradingDate
---,(select top 1 cph.[Date] from CompanyPriceHistory cph where cph.CompanyID = c.CompanyID and cph.[Date] <= @LastTradingDate order by cph.[Date] desc) 
 from Company c 
 
 if isnull(@isBookMarkCategory,0) = 1
@@ -70,33 +66,31 @@ if isnull(@CategoryIDs,'') != ''
 select count(*) as [Count]
 from Company c
 join @TempCompanyTable tct on tct.CompanyID = c.CompanyID 
-left outer join CompanyFundamental cf on cf.CompanyID = c.CompanyID
+left outer join CompanyPriceAverage cpa on cpa.CompanyID = c.CompanyID
 left outer join @CompanyParamTable cpara on c.CompanyID = cpara.ID 
 left outer join @TempBookMarkTable tb on tb.CompanyID = c.CompanyID 
 left outer join @TempCategoryTable tc on tc.CompanyID = c.CompanyID
 where (cpara.ID > 0 or @CompanyIDs is null)
 and (c.CompanyID = @CompanyID or @CompanyID is null) 
 and (c.[CompanyName] like @Name or isnull(@Name,'')='')
-and (c.LastTradingDate is null or c.LastTradingDate < @LastTradingDate or @LastTradingDate is null)
-and (cf.LastUpdatedDate is null or cf.LastUpdatedDate < @LastFundamentalDate or @LastFundamentalDate is null)
-and (c.LastMoneyControlDate is null or c.LastMoneyControlDate < @LastMoneyControlDate or @LastMoneyControlDate is null)
+and (cpa.LastUpdatedDate is null or cpa.LastUpdatedDate < @LastTradingDate or @LastTradingDate is null)
 and (tb.CompanyID > 0 or @isBookMarkCategory is null)
 and (tc.CompanyID > 0 or @CategoryIDs is null)
 
-select c.CompanyID,c.CompanyName,c.Symbol,c.IsBookMark,c.IsArchive,c.InvestingSymbol,c.InvestingUrl,tct.LastTradingDate,c.MoneyControlSymbol,c.MoneyControlUrl 
-,c.LastTradingDate as LastUpdatedDate
+select c.CompanyID
+,c.CompanyName,c.Symbol,c.IsBookMark,c.IsArchive,c.InvestingSymbol,c.InvestingUrl,c.LastTradingDate,c.MoneyControlSymbol,c.MoneyControlUrl
+,cpa.*
+,cpa.LastUpdatedDate as LastUpdatedDate
 from Company c
 join @TempCompanyTable tct on tct.CompanyID = c.CompanyID 
-left outer join CompanyFundamental cf on cf.CompanyID = c.CompanyID
+left outer join CompanyPriceAverage cpa on cpa.CompanyID = c.CompanyID
 left outer join @CompanyParamTable cpara on c.CompanyID = cpara.ID 
 left outer join @TempBookMarkTable tb on tb.CompanyID = c.CompanyID 
 left outer join @TempCategoryTable tc on tc.CompanyID = c.CompanyID 
 where (cpara.ID > 0 or @CompanyIDs is null)
 and (c.CompanyID = @CompanyID or @CompanyID is null) 
 and (c.[CompanyName] like @Name or isnull(@Name,'')='')
-and (c.LastTradingDate is null or c.LastTradingDate < @LastTradingDate or @LastTradingDate is null)
-and (cf.LastUpdatedDate is null or cf.LastUpdatedDate < @LastFundamentalDate or @LastFundamentalDate is null)
-and (c.LastMoneyControlDate is null or c.LastMoneyControlDate < @LastMoneyControlDate or @LastMoneyControlDate is null)
+and (cpa.LastUpdatedDate is null or cpa.LastUpdatedDate < @LastTradingDate or @LastTradingDate is null)
 and (tb.CompanyID > 0 or @isBookMarkCategory is null)
 and (tc.CompanyID > 0 or @CategoryIDs is null)
 --{{ORDER_BY_START}}

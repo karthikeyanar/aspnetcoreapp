@@ -1,4 +1,5 @@
-﻿$(function () {
+﻿
+$(function () {
     var $tbl = $("#tblCompany");
     $tbl.stickyTableHeaders();
 
@@ -13,11 +14,7 @@
             var chk = $("#chkIsBookMark")[0];
             if (chk.checked) {
                 p.params.push({ "name": "IsBookMark", "value": true })
-            }
-            chk = $("#chkIsArchive")[0];
-            if (chk.checked) {
-                p.params.push({ "name": "IsArchive", "value": true })
-            }
+            } 
         },
         onSuccess: function (t, g) { },
         onTemplate: function (data) {
