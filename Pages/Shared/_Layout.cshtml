@@ -77,6 +77,12 @@
                   Average
                 </a>
               </li>
+              <li class="nav-item">
+                 <a class="nav-link" asp-page="/CAGR">
+                  <span data-feather="file"></span>
+                  CAGR
+                </a>
+              </li>
               <!--<li class="nav-item">
                  <a class="nav-link" asp-page="/LongTerm">
                   <span data-feather="file"></span>
@@ -92,7 +98,7 @@
         </main>
       </div>
     </div>
-
+    <div class="loading-ajax" style="position:fixed;z-index:99999;background-color:yellow;color:black;width:100x;top:0px;left:50%;padding:8px;border-radius:5px;display:none;">Loading...</div>
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
@@ -107,6 +113,18 @@
     <script src="~/js/select2/select2.min-1.0.js" asp-append-version="true"></script>
     <script src="~/js/jquery.stickytableheaders.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+      $(function(){
+        $(document).ajaxStart(function() {
+            $('.loading-ajax').show(); 
+        });
+        $(document).ajaxStop(function() {
+            $('.loading-ajax').hide();
+        }).ajaxError(function() {
+            $('.loading-ajax').hide();
+        });
+      });
+    </script>
     @RenderSection("Scripts", required: false)
   </body>
 </html>

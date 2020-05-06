@@ -4,7 +4,7 @@ set @fromDate = '2018-01-01'; -- GETDATE();
 declare @isBookMarkCategory bit;
 declare @isBookMark bit;
 --set @isBookMarkCategory = 1;
---set @isBookMark = 1;
+set @isBookMark = 1;
 
 --{{PARAMS}}
 
@@ -19,6 +19,7 @@ left outer join companycategory cc on cc.companyid = c.companyid
 left outer join category cat on cat.categoryid = cc.categoryid
 where (cat.IsBookMark = @isBookMarkCategory or @isBookMarkCategory is null) 
 and (c.IsBookMark = @isBookMark or @isBookMark is null)
+and isnull(c.IsArchive,0) = 0
 group by c.CompanyID
 
 select count(*) as [Count] from @TempBookMarkTable

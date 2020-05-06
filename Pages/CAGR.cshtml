@@ -1,0 +1,86 @@
+﻿@page
+@{
+    ViewData["Title"] = "";
+}
+<nav class="navbar navbar-light">
+  <form id="frmSearch" class="form-inline">
+    <a class="navbar-brand" href="#">CAGR</a> 
+    <input type="hidden" id="CategoryIDs">&nbsp;&nbsp;&nbsp;&nbsp;
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="checkbox" id="chkIsBookMarkCategory" name="IsBookMarkCategory" value="true" />
+        <label class="form-check-label" for="inlineCheckbox1">BookMark Category</label>
+    </div>
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="checkbox" id="chkIsBookMark" name="IsBookMark" value="true" />
+        <label class="form-check-label" for="inlineCheckbox1">BookMark</label>
+    </div> 
+    <button type="button" class="btn btn-success ml-2" id="btnRefresh">Refresh</button> 
+  </form>
+</nav>
+<div class="clearfix">&nbsp;</div>
+<table class="table table-hover table-striped" id="tblCAGR">
+  <thead>
+    <tr>
+     <th>#</th>
+      <th></th>
+      <th>Company</th>
+      <th>Symbol</th>
+      <th>Category</th>
+      <th class="text-right">Year 3</th>
+      <th class="text-right">Year 5</th>
+      <th class="text-right">Year 7</th>
+      <th class="text-right">Year 10</th>
+      <th class="text-right">CAGR</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+<div class="row">
+    <div class="col">
+        <div class="d-inline">
+            Rows
+        </div>
+        <div class="d-inline">
+            <select id="rows2" name="rows2" class="form-control d-inline form-control-sm" style="width:100px;">
+            </select>
+        </div>
+    </div>
+    <div class="col">
+        <div class="d-inline">
+            <span id="paging_status"></span>
+        </div>
+    </div>
+    <div class="col">
+        <div class="pull-right">
+          <nav aria-label="Page navigation example">
+              <ul class="manual-pagination pagination justify-content-end">
+              </ul>
+           </nav>
+        </div>
+    </div> 
+</div>
+@section scripts{
+ <script src="~/js/CAGR.js"></script>
+ <script type="text/html" id="grid-template">
+    {{each(i,row) rows}}
+    <tr id="tr${CompanyID}">
+        <td>${(i+1)}</td>
+        <td>
+            <i class="isbookmark-change fa {{if row.IsBookMark}}fa-star{{else}}fa-star-o{{/if}}" style="color:red;cursor:pointer;font-size:16px;"></i>
+            <input type="hidden" id="hdnCompanyID" value="${CompanyID}" />
+        </td>
+        <td>${CompanyName}</td>
+        <td>${Symbol}</td>
+        <td>${Category}</td>
+        <td class="text-right" style='{{if Year_3 >= 10}}background-color:yellow;color:#000;{{/if}}'>${formatInteger(Year_3)+'%'}</td>
+        <td class="text-right" style='{{if Year_5 >= 10}}background-color:yellow;color:#000;{{/if}}'>${formatInteger(Year_5)+'%'}</td>
+        <td class="text-right" style='{{if Year_7 >= 10}}background-color:yellow;color:#000;{{/if}}'>${formatInteger(Year_7)+'%'}</td>
+        <td class="text-right" style='{{if Year_10 >= 10}}background-color:yellow;color:#000;{{/if}}'>${formatInteger(Year_10)+'%'}</td>
+        <td class="text-right" style='{{if CAGR >= 10}}background-color:yellow;color:#000;{{/if}}'>${formatInteger(CAGR)+'%'}</td>
+        <td><a href="https://www.screener.in/company/${Symbol}" target="_blank"><i class="fa fa-search ml-3">&nbsp;</i></a></td>
+    </tr>
+    {{/each}}
+</script>
+}

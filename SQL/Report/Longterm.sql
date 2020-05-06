@@ -128,6 +128,9 @@ where dyph.CompanyID = c.CompanyID and isnull(dyph.Percentage,0) < 0) as Negativ
 join dm_year_period yp on yp.dm_year_period_id = dyph.dm_year_period_id and yp.Year > 2008
 where dyph.CompanyID = c.CompanyID) as TotalYears
 ,(select isnull(dyph.Percentage,0) from dm_year_period_history dyph
+join dm_year_period yp on yp.dm_year_period_id = dyph.dm_year_period_id and yp.Year = 2019
+where dyph.CompanyID = c.CompanyID) as Profit_2019
+,(select isnull(dyph.Percentage,0) from dm_year_period_history dyph
 join dm_year_period yp on yp.dm_year_period_id = dyph.dm_year_period_id and yp.Year = 2018
 where dyph.CompanyID = c.CompanyID) as Profit_2018
 ,isnull((select isnull(dyph.Percentage,0) from dm_year_period_history dyph
@@ -172,9 +175,9 @@ where (c.IsBookMark = @IsBookMark  or @IsBookMark is null)
 --where PositivePercentage >= 70 
 --and PiotroskiScore >= 7
 order by 
+PositivePercentage desc,
 TotalInvestors desc,
 MutualFunds desc,
 QualifiedForeignInvestors desc,
-PositivePercentage desc,
 PiotroskiScore desc
 OFFSET (@PageIndex-1)*@PageSize ROWS FETCH NEXT @PageSize ROWS ONLY

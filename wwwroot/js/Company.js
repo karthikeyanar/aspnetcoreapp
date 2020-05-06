@@ -7,11 +7,19 @@ function Company() {
 
     this.startInvesting = function () {
         console.log('self.index=', self.index);
+        var tday = ($('#LastTradingDate').val());
+        var years = cInt($('#selYears').val());
+        var startDate = moment(tday);//.add(-years, 'years').add(-5,'days');
+        var endDate = moment(tday).add(-years, 'years').add(5,'days');
+        startDate = formatDate(startDate.toDate(), 'DD/MM/YYYY');
+        endDate = formatDate(endDate.toDate(), 'DD/MM/YYYY');
+        console.log('startDate=',startDate);
+        console.log('endDate=',endDate);
         var symbols = '';
         for (var i = 0; i < self.company_json.length; i++) {
             var c = self.company_json[i];
             if (cString(c.LastTradingDate) == '') {
-                c.LastTradingDate = '01/01/2017';
+                c.LastTradingDate = $('#LastTradingDate').val();
             }
             if (cString(c.InvestingUrl) != '') {
                 if (c.InvestingUrl.indexOf('?cid=') > -1) {
@@ -21,7 +29,9 @@ function Company() {
                 } else {
                     c.InvestingUrl = c.InvestingUrl + '-historical-data';
                 }
-                symbols += c.CompanyID + '|' + c.InvestingUrl + '|' + formatDate(c.LastTradingDate, 'DD/MM/YYYY') + '|' + formatDate(new Date(), 'DD/MM/YYYY') + ',';
+                //symbols += c.CompanyID + '|' + c.InvestingUrl + '|' + formatDate(c.LastTradingDate, 'DD/MM/YYYY') + '|' + formatDate(new Date(), 'DD/MM/YYYY') + ',';
+               
+                symbols += c.CompanyID + '|' + c.InvestingUrl + '|' + startDate + '|' + endDate + ',';
             }
         }
         if (symbols != '') {
@@ -203,8 +213,8 @@ $(function () {
         usepager: true,
         useBoxStyle: false,
         url: apiUrl("/Company/List"),
-        rpOptions: [10, 20, 30, 40, 50, 100, 200, 500, 1000],
-        rp: 1000,
+        rpOptions: [10, 20, 30, 40, 50, 100, 200, 500, 1000,2000],
+        rp: 2000,
         onSubmit: function (p) {
             p.params = [];
             p.params.push({ "name": "CompanyIDs", "value": $("#CompanyIDs").val() });
@@ -213,6 +223,10 @@ $(function () {
             var chk = $("#chkIsBookMarkCategory")[0];
             if (chk.checked) {
                 p.params.push({ "name": "IsBookMarkCategory", "value": true })
+            }
+            chk = $("#chkIsBookMark")[0];
+            if (chk.checked) {
+                p.params.push({ "name": "IsBookMark", "value": true })
             }
         },
         onSuccess: function (t, g) { },
@@ -233,8 +247,8 @@ $(function () {
         },
         resizeWidth: true,
         method: "GET",
-        sortname: "CompanyName",
-        sortorder: "asc",
+        sortname: "cf.MarketCapital",
+        sortorder: "desc",
         autoload: true,
         height: 0,
         applyFixedHeader: true
@@ -365,6 +379,10 @@ $(function () {
     });
 
     $("body").on("click", "#chkIsBookMarkCategory", function () {
+        $tbl.flexReload2();
+    });
+
+    $("body").on("click", "#chkIsBookMark", function () {
         $tbl.flexReload2();
     });
 
@@ -560,6 +578,35 @@ $(function () {
             var html = $("#moneycontrol_index").val() + ' of ' + $("#moneycontrol_total").val() + " - " + json.CompanyName;
             $("#moneycontrol_csv_log").html(html);
             $tbl.flexReload2();
+        }).always(function () {
+        });
+    });
+
+    $("body").on("click", ".isbookmark-change", function () {
+        var $this = $(this);
+        var $tr = $this.parents("tr:first");
+        var companyId = cInt($("#hdnCompanyID", $tr).val());
+        var isBookMark = false;
+        if ($this.hasClass('fa-star-o')) {
+            isBookMark = true;
+        } else {
+            isBookMark = false;
+        }
+        $this.removeClass('fa-star').removeClass('fa-star-o');
+        if (isBookMark == true) {
+            $this.addClass('fa-star');
+        } else {
+            $this.addClass('fa-star-o');
+        }
+        var url = apiUrl("/Company/UpdateBookMark");
+        var d = { "CompanyID": companyId, "IsBookMark": isBookMark };
+        $.ajax({
+            "url": url,
+            "cache": false,
+            "type": "POST",
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(d)
+        }).done(function (json) {
         }).always(function () {
         });
     });

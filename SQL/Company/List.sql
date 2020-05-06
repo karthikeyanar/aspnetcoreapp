@@ -7,11 +7,13 @@ DECLARE @LastMoneyControlDate date;
 DECLARE @CompanyIDs varchar(max);
 DECLARE @CategoryIDs varchar(max);
 declare @isBookMarkCategory bit;
+declare @isBookMark bit;
 --set @LastTradingDate = GetDate() -- // '2017-12-29';
 --set @CompanyIDs = '71';
 --set @CategoryIDs = '1';
 --set @LastFundamentalDate = '2018-12-30';
 --set @LastMoneyControlDate = '2018-12-29';
+--set @isBookMark = 1;
 
 --{{PARAMS}}
 if isnull(@Name,'')!=''
@@ -82,9 +84,11 @@ and (cf.LastUpdatedDate is null or cf.LastUpdatedDate < @LastFundamentalDate or 
 and (c.LastMoneyControlDate is null or c.LastMoneyControlDate < @LastMoneyControlDate or @LastMoneyControlDate is null)
 and (tb.CompanyID > 0 or @isBookMarkCategory is null)
 and (tc.CompanyID > 0 or @CategoryIDs is null)
+and (c.IsBookMark = @isBookMark or @isBookMark is null)
 
 select c.CompanyID,c.CompanyName,c.Symbol,c.IsBookMark,c.IsArchive,c.InvestingSymbol,c.InvestingUrl,tct.LastTradingDate,c.MoneyControlSymbol,c.MoneyControlUrl 
 ,c.LastTradingDate as LastUpdatedDate
+,cf.MarketCapital 
 from Company c
 join @TempCompanyTable tct on tct.CompanyID = c.CompanyID 
 left outer join CompanyFundamental cf on cf.CompanyID = c.CompanyID
@@ -99,7 +103,8 @@ and (cf.LastUpdatedDate is null or cf.LastUpdatedDate < @LastFundamentalDate or 
 and (c.LastMoneyControlDate is null or c.LastMoneyControlDate < @LastMoneyControlDate or @LastMoneyControlDate is null)
 and (tb.CompanyID > 0 or @isBookMarkCategory is null)
 and (tc.CompanyID > 0 or @CategoryIDs is null)
+and (c.IsBookMark = @isBookMark or @isBookMark is null)
 --{{ORDER_BY_START}}
-order by [CompanyName] asc
+order by cf.MarketCapital desc,[CompanyName] asc
 --{{ORDER_BY_END}}
 OFFSET (@PageIndex-1)*@PageSize ROWS FETCH NEXT @PageSize ROWS ONLY

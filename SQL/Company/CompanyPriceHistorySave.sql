@@ -56,5 +56,6 @@ else
 		 WHERE CompanyID = @companyID and [Date] = @date
 	end
 
+update company set LastTradingDate = GetDate() where CompanyID = @companyID;
 
 

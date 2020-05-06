@@ -119,6 +119,14 @@ $.extend(window, {
         }
         return (dt.getMonth() + 1) + '/01/' + dt.getFullYear();
     }
+    , formatInteger: function (d) {
+        d = cFloat(d);
+        if (d == 0) {
+            return "";
+        } else {
+            return accounting.formatNumber(d, { precision: 0, checkNegative: false });
+        }
+    }
     , formatNumber: function (d, decimalPlace) {
         var precision = cFloat(decimalPlace);
         if (precision <= 0) {

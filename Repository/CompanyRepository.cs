@@ -52,6 +52,10 @@ namespace aspnetcoreapp.Repository
             {
                 sqlParams += string.Format("set @isBookMarkCategory = 1;");
             }
+             if ((criteria.IsBookMark ?? false) == true)
+            {
+                sqlParams += string.Format("set @isBookMark = 1;");
+            }
             if ((criteria.LastTradingDate ?? Helper.MinDateTime).Year > 1900)
             {
                 sqlParams += string.Format("set @LastTradingDate = '{0}';", (criteria.LastTradingDate ?? Helper.MinDateTime).ToString("yyyy-MM-dd"));

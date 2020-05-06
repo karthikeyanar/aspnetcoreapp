@@ -23,6 +23,18 @@ namespace aspnetcoreapp.Controllers {
             IReportRepository repository = new ReportRepository();
             return repository.GetMonthly(criteria);
         }
+
+        [HttpGet]
+        public ActionResult<PaginatedListResult<DailyModel>> Daily([FromQuery] SearchModel criteria) {
+            IReportRepository repository = new ReportRepository();
+            return repository.GetDaily(criteria);
+        }
+
+        [HttpGet]
+        public ActionResult<PaginatedListResult<CAGRModel>> CAGR([FromQuery] SearchModel criteria) {
+            IReportRepository repository = new ReportRepository();
+            return repository.GetCAGR(criteria);
+        }
  
     }
 

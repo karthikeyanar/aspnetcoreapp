@@ -11,6 +11,7 @@ namespace aspnetcoreapp.Models
         public int? CategoryID {get;set;}
         public bool? IsBookMarkCategory { get; set; }
         public DateTime? FromDate { get; set; }
+        public DateTime? ToDate { get; set; }
         public DateTime? LastTradingDate { get; set; }
         public string CompanyIDs {get; set;}
         public string CategoryIDs {get; set;}

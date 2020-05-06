@@ -6,8 +6,8 @@ declare @year int;
 declare @isBookMarkCategory bit;
 declare @isBookMark bit;
 set @today = GETDATE();
-set @isBookMarkCategory = 1;
---set @isBookMark = 1;
+--set @isBookMarkCategory = 1;
+set @isBookMark = 1;
 set @year = 2007;
 
 --{{PARAMS}}

@@ -14,6 +14,7 @@ namespace aspnetcoreapp.Models
         public string InvestingUrl { get; set; }
         public string MoneyControlSymbol { get; set; }
         public string MoneyControlUrl { get; set; }
+        public decimal? MarketCapital {get;set;}
 
         public DateTime? LastTradingDate { get; set; }
     }
