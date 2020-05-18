@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -13,89 +12,76 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-namespace aspnetcoreapp.Controllers
-{
+namespace aspnetcoreapp.Controllers {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class CompanyController : ControllerBase
-    {
+    public class CompanyController : ControllerBase {
         private readonly IConfiguration configuration;
-        public CompanyController(IConfiguration config)
-        {
+        public CompanyController(IConfiguration config) {
             configuration = config;
         }
 
         [HttpGet]
-        public ActionResult<PaginatedListResult<CompanyModel>> List([FromQuery] SearchModel criteria)
-        {
+        public ActionResult<PaginatedListResult<CompanyModel>> List([FromQuery] SearchModel criteria) {
 
             ICompanyRepository repository = new CompanyRepository();
             return repository.Get(criteria);
         }
 
         [HttpGet]
-        public ActionResult<PaginatedListResult<CompanyPriceAverageModel>> AverageList([FromQuery] SearchModel criteria)
-        {
+        public ActionResult<PaginatedListResult<CompanyPriceAverageModel>> AverageList([FromQuery] SearchModel criteria) {
 
             ICompanyRepository repository = new CompanyRepository();
             return repository.AverageList(criteria);
         }
 
         [HttpGet]
-        public ActionResult<PaginatedListResult<LongTermModel>> LongTerm([FromQuery] SearchModel criteria)
-        {
+        public ActionResult<PaginatedListResult<LongTermModel>> LongTerm([FromQuery] SearchModel criteria) {
 
             ICompanyRepository repository = new CompanyRepository();
             return repository.LongTerm(criteria);
         }
 
         [HttpGet]
-        public ActionResult<List<CompanyFundamentalModel>> FindCompanyFundamental([FromQuery] SearchModel criteria)
-        {
+        public ActionResult<List<CompanyFundamentalModel>> FindCompanyFundamental([FromQuery] SearchModel criteria) {
             ICompanyRepository repository = new CompanyRepository();
             return repository.FindCompanyFundamental((criteria.id ?? 0));
         }
 
         [HttpPost]
-        public ActionResult Save(CompanyModel model)
-        {
+        public ActionResult Save(CompanyModel model) {
             ICompanyRepository repository = new CompanyRepository();
             return Ok(repository.Save(model));
         }
 
         [HttpGet]
-        public ActionResult Delete([FromQuery] int id)
-        {
+        public ActionResult Delete([FromQuery] int id) {
             ICompanyRepository repository = new CompanyRepository();
             repository.Delete(id);
             return Ok();
         }
 
         [HttpGet]
-        public ActionResult DeletePriceHistory([FromQuery] int id)
-        {
+        public ActionResult DeletePriceHistory([FromQuery] int id) {
             ICompanyRepository repository = new CompanyRepository();
             repository.DeletePriceHistory(id);
             return Ok();
         }
 
         [HttpGet]
-        public ActionResult FindCompanies([FromQuery] string term)
-        {
+        public ActionResult FindCompanies([FromQuery] string term) {
             ICompanyRepository repository = new CompanyRepository();
             return Ok(repository.FindCompanies(term));
         }
 
         [HttpGet]
-        public ActionResult SplitCheck([FromQuery] SearchModel criteria)
-        {
+        public ActionResult SplitCheck([FromQuery] SearchModel criteria) {
             ICompanyRepository repository = new CompanyRepository();
             return Ok(repository.GetSplitCheck(criteria));
         }
 
         [HttpPost]
-        public ActionResult CreateSplit(SplitCheckModel model)
-        {
+        public ActionResult CreateSplit(SplitCheckModel model) {
             string filePath = string.Empty;
             filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "Split", "Insert.sql");
             string sql = System.IO.File.ReadAllText(filePath);
@@ -103,18 +89,13 @@ namespace aspnetcoreapp.Controllers
             PropertyInfo[] properties = model.GetType().GetProperties();
             SqlParameter sqlp = null;
             List<String> ignoreProperties = new List<string>() { "CompanyName", "Symbol", "Percentage", "Open", "PrevClose" };
-            foreach (var p in properties)
-            {
-                if (ignoreProperties.Contains(p.Name) == false)
-                {
+            foreach (var p in properties) {
+                if (ignoreProperties.Contains(p.Name) == false) {
                     sqlp = new SqlParameter();
                     sqlp.ParameterName = p.Name;
-                    if (p.Name == "SplitDate")
-                    {
+                    if (p.Name == "SplitDate") {
                         sqlp.Value = model.SplitDate.Value.ToString("yyyy-MM-dd");
-                    }
-                    else
-                    {
+                    } else {
                         sqlp.Value = p.GetValue(model);
                     }
                     sqlParameterCollection.Add(sqlp);
@@ -125,8 +106,7 @@ namespace aspnetcoreapp.Controllers
         }
 
         [HttpPost]
-        public ActionResult UpdateBookMark(CompanyModel model)
-        {
+        public ActionResult UpdateBookMark(CompanyModel model) {
             string sql = string.Format("update company set isbookmark={0} where companyid={1}", (model.IsBookMark == true ? 1 : 0), model.CompanyID);
             List<SqlParameter> sqlParameterCollection = new List<SqlParameter>();
             SqlHelper.ExecuteNonQuery(sql, sqlParameterCollection);
@@ -134,205 +114,108 @@ namespace aspnetcoreapp.Controllers
         }
 
         [HttpPost]
-        public ActionResult UpdateScreenerCSV(SearchModel model)
-        {
+        public ActionResult UpdateScreenerCSV(SearchModel model) {
             CompanyFundamentalModel cf = new CompanyFundamentalModel();
             string csvContent = model.csv;
             string[] rows = csvContent.Split(("|").ToCharArray());
-            foreach (string row in rows)
-            {
+            foreach (string row in rows) {
                 string[] cells = row.Split(("~").ToCharArray());
-                if (cells[0].Contains("CompanyID"))
-                {
+                if (cells[0].Contains("CompanyID")) {
                     cf.CompanyID = DataTypeHelper.ToInt32(cells[1]);
-                }
-                else if (cells[0].Contains("Market Cap"))
-                {
+                } else if (cells[0].Contains("Market Cap")) {
                     cf.MarketCapital = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("52 weeks High / Low"))
-                {
+                } else if (cells[0].Contains("52 weeks High / Low")) {
                     cf.Week52High = DataTypeHelper.ToDecimal(cells[1]);
                     cf.Week52Low = DataTypeHelper.ToDecimal(cells[2]);
-                }
-                else if (cells[0].Contains("Book Value"))
-                {
+                } else if (cells[0].Contains("Book Value")) {
                     cf.BookValue = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Stock P/E"))
-                {
+                } else if (cells[0].Contains("Stock P/E")) {
                     cf.StockPE = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Dividend Yield"))
-                {
+                } else if (cells[0].Contains("Dividend Yield")) {
                     cf.DividendYield = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("ROCE"))
-                {
+                } else if (cells[0].Contains("ROCE")) {
                     cf.ROCE = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("ROE"))
-                {
+                } else if (cells[0].Contains("ROE")) {
                     cf.ROE = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Average return on equity 3Years"))
-                {
+                } else if (cells[0].Contains("Average return on equity 3Years")) {
                     cf.ROE_3_Years = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Average return on equity 5Years"))
-                {
+                } else if (cells[0].Contains("Average return on equity 5Years")) {
                     cf.ROE_5_Years = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Average return on equity 7Years"))
-                {
+                } else if (cells[0].Contains("Average return on equity 7Years")) {
                     cf.ROE_7_Years = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Average return on equity 10Years"))
-                {
+                } else if (cells[0].Contains("Average return on equity 10Years")) {
                     cf.ROE_10_Years = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Face Value"))
-                {
+                } else if (cells[0].Contains("Face Value")) {
                     cf.FaceValue = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Debt to equity"))
-                {
+                } else if (cells[0].Contains("Debt to equity")) {
                     cf.DE = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("PEG Ratio"))
-                {
+                } else if (cells[0].Contains("PEG Ratio")) {
                     cf.PEG = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("EPS:"))
-                {
+                } else if (cells[0].Contains("EPS:")) {
                     cf.EPS_Year_1 = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("EPS last year"))
-                {
+                } else if (cells[0].Contains("EPS last year")) {
                     cf.EPS_Year_2 = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("EPS preceding year"))
-                {
+                } else if (cells[0].Contains("EPS preceding year")) {
                     cf.EPS_Year_3 = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("EPS latest quarter"))
-                {
+                } else if (cells[0].Contains("EPS latest quarter")) {
                     cf.EPS_Quater_1 = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("EPS preceding quarter"))
-                {
+                } else if (cells[0].Contains("EPS preceding quarter")) {
                     cf.EPS_Quater_2 = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Interest"))
-                {
+                } else if (cells[0].Contains("Interest")) {
                     cf.Interest = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Profit growth:"))
-                {
+                } else if (cells[0].Contains("Profit growth:")) {
                     cf.ProfitGrowth = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Profit growth 3Years"))
-                {
+                } else if (cells[0].Contains("Profit growth 3Years")) {
                     cf.ProfitGrowth_3_Years = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Promoter holding"))
-                {
+                } else if (cells[0].Contains("Promoter holding")) {
                     cf.PromoterHolding = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Sales growth:"))
-                {
+                } else if (cells[0].Contains("Sales growth:")) {
                     cf.SalesGrowth = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("G Factor"))
-                {
+                } else if (cells[0].Contains("G Factor")) {
                     cf.GFactor = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Piotroski score"))
-                {
+                } else if (cells[0].Contains("Piotroski score")) {
                     cf.PiotroskiScore = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Price to Sales"))
-                {
+                } else if (cells[0].Contains("Price to Sales")) {
                     cf.PS = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Price to book value"))
-                {
+                } else if (cells[0].Contains("Price to book value")) {
                     cf.PB = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Sales Growth (3Yrs)"))
-                {
+                } else if (cells[0].Contains("Sales Growth (3Yrs)")) {
                     cf.SalesGrowth_3_Years = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Sales growth 5Years"))
-                {
+                } else if (cells[0].Contains("Sales growth 5Years")) {
                     cf.SalesGrowth_5_Years = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Sales growth 7Years"))
-                {
+                } else if (cells[0].Contains("Sales growth 7Years")) {
                     cf.SalesGrowth_7_Years = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Sales growth 10Years"))
-                {
+                } else if (cells[0].Contains("Sales growth 10Years")) {
                     cf.SalesGrowth_10_Years = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Profit growth 5Years"))
-                {
+                } else if (cells[0].Contains("Profit growth 5Years")) {
                     cf.ProfitGrowth_5_Years = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Profit growth 7Years"))
-                {
+                } else if (cells[0].Contains("Profit growth 7Years")) {
                     cf.ProfitGrowth_7_Years = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Profit growth 10Years"))
-                {
+                } else if (cells[0].Contains("Profit growth 10Years")) {
                     cf.ProfitGrowth_10_Years = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Current Price"))
-                {
+                } else if (cells[0].Contains("Current Price")) {
                     cf.CurrentPrice = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Net Profit latest quarter"))
-                {
+                } else if (cells[0].Contains("Net Profit latest quarter")) {
                     cf.NetProfit_Quater_1 = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Net Profit preceding quarter"))
-                {
+                } else if (cells[0].Contains("Net Profit preceding quarter")) {
                     cf.NetProfit_Quater_2 = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Net profit 2quarters back"))
-                {
+                } else if (cells[0].Contains("Net profit 2quarters back")) {
                     cf.NetProfit_Quater_3 = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Net profit 3quarters back"))
-                {
+                } else if (cells[0].Contains("Net profit 3quarters back")) {
                     cf.NetProfit_Quater_4 = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Net profit:"))
-                {
+                } else if (cells[0].Contains("Net profit:")) {
                     cf.NetProfit_Year_1 = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Net Profit last year"))
-                {
+                } else if (cells[0].Contains("Net Profit last year")) {
                     cf.NetProfit_Year_2 = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("Net Profit preceding year"))
-                {
+                } else if (cells[0].Contains("Net Profit preceding year")) {
                     cf.NetProfit_Year_3 = DataTypeHelper.ToDecimal(cells[1]);
-                }
-                else if (cells[0].Contains("quater_profit"))
-                {
+                } else if (cells[0].Contains("quater_profit")) {
                     cf.QuaterProfits = cells[1];
-                }
-                else if (cells[0].Contains("year_profit"))
-                {
+                } else if (cells[0].Contains("year_profit")) {
                     cf.YearProfits = cells[1];
-                }
-                else if (cells[0].Contains("quater_sales"))
-                {
+                } else if (cells[0].Contains("quater_sales")) {
                     cf.QuaterSales = cells[1];
-                }
-                else if (cells[0].Contains("year_sales"))
-                {
+                } else if (cells[0].Contains("year_sales")) {
                     cf.YearSales = cells[1];
                 }
             }
@@ -342,26 +225,19 @@ namespace aspnetcoreapp.Controllers
             List<SqlParameter> sqlParameterCollection = new List<SqlParameter>();
             PropertyInfo[] properties = cf.GetType().GetProperties();
             SqlParameter sqlp = null;
-            List<String> ignoreProperties = new List<string>() { };
-            foreach (var p in properties)
-            {
-                if (ignoreProperties.Contains(p.Name) == false)
-                {
+            List<String> ignoreProperties = new List<string>() {};
+            foreach (var p in properties) {
+                if (ignoreProperties.Contains(p.Name) == false) {
                     sqlp = new SqlParameter();
                     sqlp.ParameterName = p.Name;
                     sqlp.Value = p.GetValue(cf);
-                    if (p.Name != "QuaterProfits" && p.Name != "YearProfits"
-                    && p.Name != "QuaterSales" && p.Name != "YearSales")
-                    {
-                        if (DataTypeHelper.ToDecimal(Convert.ToString(sqlp.Value)) == 0)
-                        {
+                    if (p.Name != "QuaterProfits" && p.Name != "YearProfits" &&
+                        p.Name != "QuaterSales" && p.Name != "YearSales") {
+                        if (DataTypeHelper.ToDecimal(Convert.ToString(sqlp.Value)) == 0) {
                             sqlp.Value = 0;
                         }
-                    }
-                    else
-                    {
-                        if (Convert.ToString(sqlp.Value) == "")
-                        {
+                    } else {
+                        if (Convert.ToString(sqlp.Value) == "") {
                             sqlp.Value = "";
                         }
                     }
@@ -373,33 +249,25 @@ namespace aspnetcoreapp.Controllers
         }
 
         [HttpPost]
-        public ActionResult UpdateMoneyControlCSV(SearchModel model)
-        {
+        public ActionResult UpdateMoneyControlCSV(SearchModel model) {
             ICompanyRepository repository = new CompanyRepository();
             List<ShareHoldingTypeModel> shareHoldingTypes = repository.GetShareHoldingTypes();
             string csvContent = model.csv;
             string[] rows = csvContent.Split((";").ToCharArray());
-            foreach (string row in rows)
-            {
+            foreach (string row in rows) {
                 CompanyShareHoldingModel holding = null;
                 string[] cells = row.Split(("|").ToCharArray());
-                if (cells.Length >= 3)
-                {
-                    ShareHoldingTypeModel type = (from q in shareHoldingTypes
-                                                  where q.ShareHoldingTypeName == cells[1]
-                                                  select q).FirstOrDefault();
-                    if (type == null)
-                    {
+                if (cells.Length >= 3) {
+                    ShareHoldingTypeModel type = (from q in shareHoldingTypes where q.ShareHoldingTypeName == cells[1] select q).FirstOrDefault();
+                    if (type == null) {
                         Helper.Log("Holding type does not exist name=" + cells[1], "MoneyControlCSV");
                     }
-                    if (type != null)
-                    {
-                        holding = new CompanyShareHoldingModel
-                        {
-                            CompanyID = DataTypeHelper.ToInt32(cells[0]),
-                            ShareHoldingTypeID = type.ShareHoldingTypeID,
-                            Total = DataTypeHelper.ToInt32(cells[2]),
-                            TotalShares = DataTypeHelper.ToInt32(cells[3])
+                    if (type != null) {
+                        holding = new CompanyShareHoldingModel {
+                        CompanyID = DataTypeHelper.ToInt32(cells[0]),
+                        ShareHoldingTypeID = type.ShareHoldingTypeID,
+                        Total = DataTypeHelper.ToInt32(cells[2]),
+                        TotalShares = DataTypeHelper.ToInt32(cells[3])
                         };
 
                         string filePath = string.Empty;
@@ -408,16 +276,13 @@ namespace aspnetcoreapp.Controllers
                         List<SqlParameter> sqlParameterCollection = new List<SqlParameter>();
                         PropertyInfo[] properties = holding.GetType().GetProperties();
                         SqlParameter sqlp = null;
-                        List<String> ignoreProperties = new List<string>() { };
-                        foreach (var p in properties)
-                        {
-                            if (ignoreProperties.Contains(p.Name) == false)
-                            {
+                        List<String> ignoreProperties = new List<string>() {};
+                        foreach (var p in properties) {
+                            if (ignoreProperties.Contains(p.Name) == false) {
                                 sqlp = new SqlParameter();
                                 sqlp.ParameterName = p.Name;
                                 sqlp.Value = p.GetValue(holding);
-                                if (DataTypeHelper.ToDecimal(Convert.ToString(sqlp.Value)) == 0)
-                                {
+                                if (DataTypeHelper.ToDecimal(Convert.ToString(sqlp.Value)) == 0) {
                                     sqlp.Value = 0;
                                 }
                                 sqlParameterCollection.Add(sqlp);
@@ -431,29 +296,24 @@ namespace aspnetcoreapp.Controllers
         }
 
         [HttpPost]
-        public ActionResult UpdateTechnical(SearchModel model)
-        {
+        public ActionResult UpdateTechnical(SearchModel model) {
             string csvContent = model.csv;
             string[] arr = csvContent.Split(("^").ToCharArray());
-            CompanyPriceAverageModel avgModel = new CompanyPriceAverageModel
-            {
+            CompanyPriceAverageModel avgModel = new CompanyPriceAverageModel {
                 CompanyID = DataTypeHelper.ToInt32(arr[0]),
                 CurrentPrice = DataTypeHelper.ToDecimal(arr[1]),
             };
             string[] rows = arr[2].Split(("~").ToCharArray());
-            foreach (string row in rows)
-            {
+            foreach (string row in rows) {
                 string[] cells = row.Split(("|").ToCharArray());
                 bool? isBuy = false;
 
-                if (cells[1].Contains("Buy"))
-                {
+                if (cells[1].Contains("Buy")) {
                     isBuy = true;
                 }
                 cells[1] = cells[1].Replace("Sell", "").Replace("Buy", "").Replace(" ", "");
                 decimal? value = DataTypeHelper.ToDecimal(cells[1]);
-                switch (cells[0])
-                {
+                switch (cells[0]) {
                     case "MA5":
                         avgModel.IsBuy_MA5 = isBuy;
                         avgModel.MA5 = value;
@@ -486,10 +346,8 @@ namespace aspnetcoreapp.Controllers
             sql = System.IO.File.ReadAllText(filePath);
             string connectionString = Helper.ConnectionString;
             SqlParameter sqlp = null;
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
+            try {
+                using(SqlConnection connection = new SqlConnection(connectionString)) {
                     SqlCommand command = new SqlCommand(sql, connection);
                     sqlp = new SqlParameter();
                     sqlp.ParameterName = "CompanyID";
@@ -564,11 +422,8 @@ namespace aspnetcoreapp.Controllers
                     command.Connection.Open();
                     command.ExecuteNonQuery();
                 }
-            }
-            catch (Exception ex)
-            {
-                if (ex.Message.ToString().Contains("PRIMARY KEY") == false)
-                {
+            } catch (Exception ex) {
+                if (ex.Message.ToString().Contains("PRIMARY KEY") == false) {
                     return BadRequest(ex.Message);
                 }
             }
@@ -576,8 +431,7 @@ namespace aspnetcoreapp.Controllers
         }
 
         [HttpPost]
-        public ActionResult UpdateCSV(SearchModel model)
-        {
+        public ActionResult UpdateCSV(SearchModel model) {
             string csvContent = model.csv.Replace("|", Environment.NewLine);
             string connectionString = Helper.ConnectionString;
             List<string> symbols = new List<string>();
@@ -589,65 +443,56 @@ namespace aspnetcoreapp.Controllers
             int companyID = 0;
 
             List<InvestmentPrice> priceHistory = new List<InvestmentPrice>();
-            using (TextReader reader = new StringReader(csvContent))
-            {
+            using(TextReader reader = new StringReader(csvContent)) {
                 csv = new CsvReader(reader);
-                while (csv.Read())
-                {
+                while (csv.Read()) {
                     companyID = DataTypeHelper.ToInt32(csv.GetField<string>("CompanyID"));
                     DateTime date = DataTypeHelper.ToDateTime(csv.GetField<string>("Date"));
                     decimal open = DataTypeHelper.ToDecimal(csv.GetField<string>("Open Price"));
                     decimal high = DataTypeHelper.ToDecimal(csv.GetField<string>("High Price"));
                     decimal low = DataTypeHelper.ToDecimal(csv.GetField<string>("Low Price"));
-                    //decimal close = DataTypeHelper.ToDecimal(csv.GetField<string>("Close Price"));
+                    decimal close = DataTypeHelper.ToDecimal(csv.GetField<string>("Close Price"));
                     decimal change = DataTypeHelper.ToDecimal(csv.GetField<string>("Change"));
-                    decimal close = 0;
+                    /* decimal close = 0; 
                     decimal p = (open * change) / 100;
                     if (change > 0)
                         close = open + p;
                     else
-                        close = open - (p * -1);
+                        close = open - (p * -1); */
 
                     decimal prevCloseValue = 0;
-                    p = (close * change) / 100;
+                    decimal p = (close * change) / 100;
                     if (change > 0)
                         prevCloseValue = close + p;
                     else
                         prevCloseValue = close - (p * -1);
 
                     DateTime dt = DataTypeHelper.ToDateTime(date);
-                    if (companyID > 0)
-                    {
-                        priceHistory.Add(new InvestmentPrice
-                        {
+                    if (companyID > 0) {
+                        priceHistory.Add(new InvestmentPrice {
                             Close = close,
-                            CompanyID = companyID,
-                            Date = date,
-                            High = high,
-                            Low = low,
-                            Open = open,
-                            PrevClose = prevCloseValue
+                                CompanyID = companyID,
+                                Date = date,
+                                High = high,
+                                Low = low,
+                                Open = open,
+                                PrevClose = prevCloseValue
                         });
                     }
                 }
             }
 
-            priceHistory = (from q in priceHistory
-                            orderby q.Date ascending
-                            select q).ToList();
+            priceHistory = (from q in priceHistory orderby q.Date ascending select q).ToList();
 
             string filePath = string.Empty;
             filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "Company", "CompanyPriceHistorySave.sql");
-            foreach (var price in priceHistory)
-            {
+            foreach (var price in priceHistory) {
                 string sql = "";
                 sql = System.IO.File.ReadAllText(filePath);
                 //Console.WriteLine("dt=" + dt.ToString("MM/dd/yyyy"));
-                try
-                {
-                    using (SqlConnection connection = new SqlConnection(
-                       connectionString))
-                    {
+                try {
+                    using(SqlConnection connection = new SqlConnection(
+                        connectionString)) {
                         SqlCommand command = new SqlCommand(sql, connection);
                         sqlp = new SqlParameter();
                         sqlp.ParameterName = "companyID";
@@ -656,7 +501,7 @@ namespace aspnetcoreapp.Controllers
 
                         sqlp = new SqlParameter();
                         sqlp.ParameterName = "date";
-                        sqlp.Value = price.Date;//.ToString("yyyy-MM-dd");
+                        sqlp.Value = price.Date; //.ToString("yyyy-MM-dd");
                         command.Parameters.Add(sqlp);
 
                         sqlp = new SqlParameter();
@@ -687,17 +532,13 @@ namespace aspnetcoreapp.Controllers
                         command.Connection.Open();
                         command.ExecuteNonQuery();
                     }
-                }
-                catch (Exception ex)
-                {
-                    if (ex.Message.ToString().Contains("PRIMARY KEY") == false)
-                    {
+                } catch (Exception ex) {
+                    if (ex.Message.ToString().Contains("PRIMARY KEY") == false) {
                         return BadRequest(ex.Message);
                     }
                 }
             }
-            if (companyID > 0)
-            {
+            if (companyID > 0) {
                 ICompanyRepository repository = new CompanyRepository();
                 //repository.CreateEquitySplit(companyID);
                 repository.UpdateCompanyHistory(companyID);
@@ -706,26 +547,22 @@ namespace aspnetcoreapp.Controllers
         }
 
         [HttpPost]
-        public ActionResult UpdateNSECSV(SearchModel model)
-        {
+        public ActionResult UpdateNSECSV(SearchModel model) {
             List<CompanyModel> companies = new List<CompanyModel>();
             string connectionString = Helper.ConnectionString;
             string sql = "select companyid,symbol from company";
             int companyID;
             string symbol;
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
+            using(SqlConnection connection = new SqlConnection(connectionString)) {
                 SqlCommand command = new SqlCommand(sql, connection);
                 command.Connection.Open();
                 SqlDataReader dr = command.ExecuteReader();
-                while (dr.Read())
-                {
-                    companyID = (int)dr["companyid"];
+                while (dr.Read()) {
+                    companyID = (int) dr["companyid"];
                     symbol = dr["symbol"].ToString();
-                    companies.Add(new CompanyModel
-                    {
+                    companies.Add(new CompanyModel {
                         CompanyID = companyID,
-                        Symbol = symbol
+                            Symbol = symbol
                     });
                 }
                 dr.Close();
@@ -810,11 +647,9 @@ namespace aspnetcoreapp.Controllers
             };
 
             List<InvestmentPrice> priceHistory = new List<InvestmentPrice>();
-            using (TextReader reader = new StringReader(csvContent))
-            {
+            using(TextReader reader = new StringReader(csvContent)) {
                 csv = new CsvReader(reader);
-                while (csv.Read())
-                {
+                while (csv.Read()) {
                     symbol = "";
                     companyID = 0;
 
@@ -829,76 +664,63 @@ namespace aspnetcoreapp.Controllers
                     string prev = csv.GetField<string>("Prev Close");
                     string turnOver = csv.GetField<string>("Turnover");
                     DateTime dt = DataTypeHelper.ToDateTime(date);
-                    if (string.IsNullOrEmpty(symbol) == false)
-                    {
+                    if (string.IsNullOrEmpty(symbol) == false) {
                         symbol = symbol.Replace("&amp;", "&");
 
-                        companyID = (from q in companies
-                                     where q.Symbol == symbol
-                                     select q.CompanyID
-                                            ).FirstOrDefault();
+                        companyID = (from q in companies where q.Symbol == symbol select q.CompanyID).FirstOrDefault();
 
-                        if (companyID <= 0)
-                        {
+                        if (companyID <= 0) {
                             return BadRequest("CompanyID does not exist");
-                        }
-                        else
-                        {
-                            priceHistory.Add(new InvestmentPrice
-                            {
+                        } else {
+                            priceHistory.Add(new InvestmentPrice {
                                 CompanyID = companyID,
-                                Date = dt,
-                                Close = DataTypeHelper.ToDecimal(close),
-                                High = DataTypeHelper.ToDecimal(high),
-                                Low = DataTypeHelper.ToDecimal(low),
-                                Open = DataTypeHelper.ToDecimal(open),
-                                PrevClose = DataTypeHelper.ToDecimal(prev),
+                                    Date = dt,
+                                    Close = DataTypeHelper.ToDecimal(close),
+                                    High = DataTypeHelper.ToDecimal(high),
+                                    Low = DataTypeHelper.ToDecimal(low),
+                                    Open = DataTypeHelper.ToDecimal(open),
+                                    PrevClose = DataTypeHelper.ToDecimal(prev),
                             });
                         }
                     }
                 }
             }
 
-            priceHistory = (from q in priceHistory
-                            orderby q.Date ascending
-                            select q).ToList();
+            priceHistory = (from q in priceHistory orderby q.Date ascending select q).ToList();
 
-            foreach (var price in priceHistory)
-            {
+            foreach (var price in priceHistory) {
                 sql = "";
                 sql = "INSERT INTO [dbo].[CompanyPriceHistory]" + Environment.NewLine +
-                " ([CompanyID]" + Environment.NewLine +
-                ",[Date]" + Environment.NewLine +
-                ",[Open]" + Environment.NewLine +
-                ",[Low]" + Environment.NewLine +
-                ",[High]" + Environment.NewLine +
-                ",[Close]" + Environment.NewLine +
-                ",[PrevClose]" + Environment.NewLine +
-                ",[OriginalOpen]" + Environment.NewLine +
-                ",[OriginalLow]" + Environment.NewLine +
-                ",[OriginalHigh]" + Environment.NewLine +
-                ",[OriginalClose]" + Environment.NewLine +
-                ",[OriginalPrevClose]" + Environment.NewLine +
-               " ) VALUES (" + Environment.NewLine +
-               "@companyID" + Environment.NewLine +
-               ",@date" + Environment.NewLine +
-               ",@open" + Environment.NewLine +
-               ",@low" + Environment.NewLine +
-               ",@high" + Environment.NewLine +
-               ",@close" + Environment.NewLine +
-               ",@prevclose" + Environment.NewLine +
-               ",@open" + Environment.NewLine +
-               ",@low" + Environment.NewLine +
-               ",@high" + Environment.NewLine +
-               ",@close" + Environment.NewLine +
-               ",@prevclose" + Environment.NewLine +
-               ")";
+                    " ([CompanyID]" + Environment.NewLine +
+                    ",[Date]" + Environment.NewLine +
+                    ",[Open]" + Environment.NewLine +
+                    ",[Low]" + Environment.NewLine +
+                    ",[High]" + Environment.NewLine +
+                    ",[Close]" + Environment.NewLine +
+                    ",[PrevClose]" + Environment.NewLine +
+                    ",[OriginalOpen]" + Environment.NewLine +
+                    ",[OriginalLow]" + Environment.NewLine +
+                    ",[OriginalHigh]" + Environment.NewLine +
+                    ",[OriginalClose]" + Environment.NewLine +
+                    ",[OriginalPrevClose]" + Environment.NewLine +
+                    " ) VALUES (" + Environment.NewLine +
+                    "@companyID" + Environment.NewLine +
+                    ",@date" + Environment.NewLine +
+                    ",@open" + Environment.NewLine +
+                    ",@low" + Environment.NewLine +
+                    ",@high" + Environment.NewLine +
+                    ",@close" + Environment.NewLine +
+                    ",@prevclose" + Environment.NewLine +
+                    ",@open" + Environment.NewLine +
+                    ",@low" + Environment.NewLine +
+                    ",@high" + Environment.NewLine +
+                    ",@close" + Environment.NewLine +
+                    ",@prevclose" + Environment.NewLine +
+                    ")";
                 //Console.WriteLine("dt=" + dt.ToString("MM/dd/yyyy"));
-                try
-                {
-                    using (SqlConnection connection = new SqlConnection(
-                       connectionString))
-                    {
+                try {
+                    using(SqlConnection connection = new SqlConnection(
+                        connectionString)) {
                         SqlCommand command = new SqlCommand(sql, connection);
                         sqlp = new SqlParameter();
                         sqlp.ParameterName = "companyID";
@@ -907,7 +729,7 @@ namespace aspnetcoreapp.Controllers
 
                         sqlp = new SqlParameter();
                         sqlp.ParameterName = "date";
-                        sqlp.Value = price.Date;//.ToString("yyyy-MM-dd");
+                        sqlp.Value = price.Date; //.ToString("yyyy-MM-dd");
                         command.Parameters.Add(sqlp);
 
                         sqlp = new SqlParameter();
@@ -938,17 +760,13 @@ namespace aspnetcoreapp.Controllers
                         command.Connection.Open();
                         command.ExecuteNonQuery();
                     }
-                }
-                catch (Exception ex)
-                {
-                    if (ex.Message.ToString().Contains("PRIMARY KEY") == false)
-                    {
+                } catch (Exception ex) {
+                    if (ex.Message.ToString().Contains("PRIMARY KEY") == false) {
                         return BadRequest(ex.Message);
                     }
                 }
             }
-            if (companyID > 0)
-            {
+            if (companyID > 0) {
                 //ICompanyRepository repository = new CompanyRepository();
                 //repository.CreateEquitySplit(companyID);
                 //repository.UpdateCompanyHistory(companyID);
@@ -958,8 +776,7 @@ namespace aspnetcoreapp.Controllers
 
     }
 
-    public class OldSymbol
-    {
+    public class OldSymbol {
         public string old_symbol { get; set; }
         public string new_symbol { get; set; }
     }

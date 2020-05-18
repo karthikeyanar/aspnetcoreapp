@@ -1,0 +1,28 @@
+{
+  "name": "Money Control CSV Download",
+  "description": "Adds a print button to the browser.",
+  "version": "1.4",
+  "permissions": [
+    "tabs",
+    "windows",
+    "http://localhost:6868/*",
+    "http://localhost:5000/*",
+    "https://www.moneycontrol.com/*",
+    "https://www.nseindia.com/*",
+    "https://in.investing.com/*",
+    "https://www.screener.in/*",
+    "activeTab",
+    "declarativeContent",
+    "storage",
+    "input"
+  ],
+  "background": {
+    "scripts": [ "background.js" ],
+    "persistent": false
+  },
+  "browser_action": {
+    "default_title": "Print this page",
+    "default_icon": "print_16x16.png"
+  },
+  "manifest_version": 2
+}

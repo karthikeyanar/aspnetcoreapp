@@ -56,6 +56,6 @@ else
 		 WHERE CompanyID = @companyID and [Date] = @date
 	end
 
-update company set LastTradingDate = GetDate() where CompanyID = @companyID;
+update company set LastTradingDate = (select top 1 [Date] from CompanyPriceHistory where CompanyID = company.CompanyID order by [Date] desc) where CompanyID = @companyID;
 
 

@@ -4,7 +4,7 @@ set @fromDate = '2018-01-01'; -- GETDATE();
 declare @isBookMarkCategory bit;
 declare @isBookMark bit;
 --set @isBookMarkCategory = 1;
-set @isBookMark = 1;
+--set @isBookMark = 1;
 
 --{{PARAMS}}
 
@@ -37,7 +37,9 @@ join @TempBookMarkTable tb on tb.CompanyID = his.CompanyID
 left outer join Company company on company.CompanyID = tb.CompanyID
 where p.FromDate = @fromDate
 and (tb.IsBookMark = @isBookMarkCategory or @isBookMarkCategory is null)
-order by his.prevpercentage desc
+--{{ORDER_BY_START}}
+order by his.[percentage] desc
+--{{ORDER_BY_END}}
 OFFSET (@PageIndex-1)*@PageSize ROWS FETCH NEXT @PageSize ROWS ONLY
  
 select AVG(Percentage) as Percentage from (
@@ -54,6 +56,6 @@ join @TempBookMarkTable tb on tb.CompanyID = his.CompanyID
 left outer join Company company on company.CompanyID = tb.CompanyID
 where p.FromDate = @fromDate
 and (tb.IsBookMark = @isBookMarkCategory or @isBookMarkCategory is null)
-order by his.prevpercentage desc
+order by his.[percentage] desc
 OFFSET (@PageIndex-1)*@PageSize ROWS FETCH NEXT @PageSize ROWS ONLY
 ) as tbl

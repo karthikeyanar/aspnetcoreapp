@@ -10,9 +10,9 @@ function Company() {
         var tday = ($('#LastTradingDate').val());
         var years = cInt($('#selYears').val());
         var startDate = moment(tday);//.add(-years, 'years').add(-5,'days');
-        var endDate = moment(tday).add(-years, 'years').add(5,'days');
-        startDate = formatDate(startDate.toDate(), 'DD/MM/YYYY');
-        endDate = formatDate(endDate.toDate(), 'DD/MM/YYYY');
+        var endDate = moment(new Date()).add(5,'days'); //moment(tday).add(-years, 'years').add(5,'days');
+        startDate = formatDate(startDate.toDate(), 'YYYY/MM/DD');
+        endDate = formatDate(endDate.toDate(), 'YYYY/MM/DD');
         console.log('startDate=',startDate);
         console.log('endDate=',endDate);
         var symbols = '';
@@ -247,8 +247,8 @@ $(function () {
         },
         resizeWidth: true,
         method: "GET",
-        sortname: "cf.MarketCapital",
-        sortorder: "desc",
+        sortname: "CompanyName",
+        sortorder: "asc",
         autoload: true,
         height: 0,
         applyFixedHeader: true
@@ -610,5 +610,11 @@ $(function () {
         }).always(function () {
         });
     });
+    var d = '2020/05/16';
+    console.log('d=',d,',parse=',Date.parse(new Date(d)),'t=',new Date(d));
+    console.log('de=',new Date(1589808617));
+    console.log('ds=',new Date(1589567400000));
+
+    //1589808617
 
 });

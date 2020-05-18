@@ -1,0 +1,1 @@
+DELETE FROM [dbo].[PortFolioTransaction] where [PortFolioTransactionID] = @PortFolioTransactionID;

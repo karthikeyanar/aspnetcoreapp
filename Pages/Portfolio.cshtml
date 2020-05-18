@@ -1,0 +1,118 @@
+﻿@page
+@{
+ViewData["Title"] = "";
+}
+<nav class="navbar navbar-light">
+    <form id="frmSearch" class="form-inline">
+        <a class="navbar-brand" href="#">Portfolio</a>
+        <button type="button" class="btn btn-success ml-5 mr-5" id="lnkAddNew">Add</button>
+    </form>
+</nav>
+<div class="clearfix">&nbsp;</div>
+<table class="table table-hover" id="tblPortfolio">
+    <thead>
+        <tr>
+            <th sortname="p.PortfolioTransactionID">ID</th>
+            <th sortname="c.CompanyName">Company</th>
+            <th sortname="c.Symbol">Symbol</th>
+            <th sortname="tt.[Name]">Type</th>
+            <th sortname="p.TransactionDate">Date</th>
+            <th sortname="p.Quantity" class="text-right">Quantity</th>
+            <th sortname="p.CostPerShare" class="text-right">Cost Per Share</th>
+            <th class="text-right">Amount</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+<div class="row">
+    <div class="col">
+        <div class="d-inline">
+            Rows
+        </div>
+        <div class="d-inline">
+            <select id="rows2" name="rows2" class="form-control d-inline
+                form-control-sm" style="width:100px;">
+            </select>
+        </div>
+    </div>
+    <div class="col">
+        <div class="d-inline">
+            <span id="paging_status"></span>
+        </div>
+    </div>
+    <div class="col">
+        <div class="pull-right">
+            <nav aria-label="Page navigation example">
+                <ul class="manual-pagination pagination justify-content-end">
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+@section scripts{
+<script src="~/js/Portfolio.js" asp-append-version="true"></script>
+<script type="text/html" id="grid-template">
+    {{each(i,row) rows}}
+    <tr id="tr${PortfolioTransactionID}">
+        <td class="edit-row">${PortfolioTransactionID}</td>
+        <td class="edit-row">${CompanyName}</td>
+        <td class="edit-row">${Symbol}</td>
+        <td class="edit-row">${TransactionTypeName}</td>
+        <td class="edit-row">${formatDate(TransactionDate)}</td>
+        <td class="edit-row text-right">${Quantity}</td>
+        <td class="edit-row text-right">${CostPerShare}</td>
+        <td class="edit-row text-right">${Amount}</td>
+        <td class="text-right">
+            <i class="fa fa-pencil edit-row">&nbsp;</i>
+            <i class="fa fa-remove ml-3 delete-row">&nbsp;</i>
+            <input type="hidden" id="PortfolioTransactionID" value="${PortfolioTransactionID}">
+        </td>
+    </tr>
+    {{/each}}
+</script>
+<script type="text/html" id="edit-template">
+    {{each(i,row) rows}}
+    <tr id="trEdit${PortfolioTransactionID}">
+        <td colspan="4">
+            <form id="frm${PortfolioTransactionID}" onsubmit="return false">
+                <div class="form-row">
+                    <div class="form-group col">
+                        <label>Company</label>
+                        <input type="hidden" id="CompanyID" name="CompanyID" value="${CompanyID}" cname="${CompanyName}" />
+                    </div> 
+                </div>
+                <div class="form-row">
+                    <div class="form-group col"> 
+                        <label>Transaction Type</label>
+                        <select id="TransactionTypeID" name="TransactionTypeID" val="${TransactionTypeID}" class="form-control">
+                            <option value="1">Buy</option>
+                            <option value="2">Sell</option>
+                            <option value="3">Dividend</option>
+                            <option value="4">Bonus</option>
+                            <option value="5">Split</option>
+                        </select>
+                    </div>
+                    <div class="form-group col">
+                        <label>Date</label>
+                        <input type="text" id="TransactionDate" name="TransactionDate" class="form-control" value="${formatDate(TransactionDate)}" />
+                    </div> 
+                    <div class="form-group col">
+                        <label>Quantity</label>
+                        <input type="text" id="Quantity" name="Quantity" value="${Quantity}" class="form-control" />
+                    </div> 
+                    <div class="form-group col"> 
+                        <label>Cost Per Share</label>
+                         <input type="text" id="CostPerShare" name="CostPerShare" value="${CostPerShare}" class="form-control" />
+                    </div> 
+                </div>
+                <input type="hidden" id="PortfolioTransactionID" name="PortfolioTransactionID" value="${PortfolioTransactionID}">
+                <button type="button" id="btnSave" class="btn btn-primary">Save</button>
+                <button type="button" id="btnCancel" class="btn btn-danger ml-2">Cancel</button>
+            </form>
+        </td>
+    </tr>
+    {{/each}}
+</script>
+}

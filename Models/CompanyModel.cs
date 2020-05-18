@@ -15,7 +15,6 @@ namespace aspnetcoreapp.Models
         public string MoneyControlSymbol { get; set; }
         public string MoneyControlUrl { get; set; }
         public decimal? MarketCapital {get;set;}
-
         public DateTime? LastTradingDate { get; set; }
     }
 
@@ -79,7 +78,7 @@ namespace aspnetcoreapp.Models
         public decimal? BookValue { get; set; }
         public decimal? FaceValue { get; set; }
         public decimal? CurrentPrice { get; set; }
-        public decimal? MarketCapital { get; set; }
+        //public decimal? MarketCapital { get; set; }
         public decimal? Week52High { get; set; }
         public decimal? Week52Low { get; set; }
         public decimal? PiotroskiScore { get; set; }

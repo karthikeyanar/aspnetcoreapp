@@ -1,0 +1,90 @@
+﻿@page
+@{
+ViewData["Title"] = "";
+}
+<nav class="navbar navbar-light">
+    <form id="frmSearch" class="form-inline">
+        <a class="navbar-brand" href="#">Investments</a>
+        <div class="pull-left">
+            Investment:&nbsp;<span id="spnTotalInvestment" style="font-weight: bold;"></span>
+        </div> 
+        <div class="pull-left" style="margin-left: 20px;">
+            Current Market Value:&nbsp;<span id="spnTotalCMV" style="font-weight: bold;"></span>
+        </div>
+        <div class="pull-left" style="margin-left: 20px;">
+            Profit:&nbsp;<span id="spnTotalProfit" style="font-weight: bold;"></span>
+        </div>
+    </form>
+</nav>
+<div class="clearfix">&nbsp;</div>
+<div class="row">
+    <div class="col">
+<div id="piecontainer">
+</div>
+    </div>
+        <div class="col">
+<div id="profitcontainer">
+</div>
+    </div>
+</div>
+<div class="clearfix">&nbsp;</div>
+<table class="table table-hover" id="tblInvestments">
+    <thead>
+        <tr>
+            <th sortname="CompanyName">Company</th>
+            <th sortname="Symbol">Symbol</th>
+            <th sortname="CategoryName">Category</th>
+            <th sortname="Quantity" class="text-right">Quantity</th>
+            <th sortname="AverageCost" class="text-right">Avg.Cost</th>
+            <th sortname="ClosePrice" class="text-right">Current Price</th>
+            <th sortname="TotalInvestment" class="text-right">Total</th>
+            <th sortname="CurrentMarketValue" class="text-right">Current Market Value</th>
+            <th sortname="ProfitPercentage" class="text-right">Profit</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+<div class="row">
+    <div class="col">
+        <div class="d-inline">
+            Rows
+        </div>
+        <div class="d-inline">
+            <select id="rows2" name="rows2" class="form-control d-inline
+                form-control-sm" style="width:100px;">
+            </select>
+        </div>
+    </div>
+    <div class="col">
+        <div class="d-inline">
+            <span id="paging_status"></span>
+        </div>
+    </div>
+    <div class="col">
+        <div class="pull-right">
+            <nav aria-label="Page navigation example">
+                <ul class="manual-pagination pagination justify-content-end">
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+@section scripts{
+<script src="~/js/Investments.js"></script>
+<script type="text/html" id="grid-template">
+    {{each(i,row) rows}}
+    <tr>
+        <td>${CompanyName}</td>
+        <td>${Symbol}</td>
+        <td>${CategoryName}</td>
+        <td class="text-right">${Quantity}</td>
+        <td class="text-right">${formatNumber(AverageCost,4)}</td>
+        <td class="text-right">${formatNumber(ClosePrice,4)}</td>
+        <td class="text-right">${formatNumber(TotalInvestment,4)}</td>
+        <td class="text-right">${formatNumber(CurrentMarketValue,4)}</td>
+        <td class="text-right">${formatNumber(ProfitPercentage,4)}&nbsp;%</td>
+    </tr>
+    {{/each}}
+</script>
+}

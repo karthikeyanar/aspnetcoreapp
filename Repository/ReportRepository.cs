@@ -25,6 +25,9 @@ namespace aspnetcoreapp.Repository {
             if(criteria.IsBookMarkCategory == true) {
                 sqlParams += string.Format("set @isBookMarkCategory = {0};", (criteria.IsBookMarkCategory ?? false) == true ? 1 : 0);
             }
+            if(criteria.IsBookMark == true) {
+                sqlParams += string.Format("set @isBookMark = {0};", (criteria.IsBookMark ?? false) == true ? 1 : 0);
+            }
             sqlParams += string.Format("set @fromDate = '{0}';", (criteria.FromDate ?? Helper.MinDateTime).ToString("MM/dd/yyyy"));
             string filePath = System.IO.Path.Combine(Helper.RootPath, "SQL", "Report", "Monthly.sql");
             string sql = System.IO.File.ReadAllText(filePath);

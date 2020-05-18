@@ -51,11 +51,23 @@
                 </a>
               </li>
               <li class="nav-item">
+                <a class="nav-link" asp-page="/Portfolio">
+                  <span data-feather="home"></span>
+                  Portfolio
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" asp-page="/Investments">
+                  <span data-feather="home"></span>
+                  Investments
+                </a>
+              </li>
+              @* <li class="nav-item">
                  <a class="nav-link" asp-page="/SplitCheck">
                   <span data-feather="file"></span>
                   Split Check
                 </a>
-              </li>
+              </li> *@
             </ul>
 
             <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
@@ -99,6 +111,9 @@
       </div>
     </div>
     <div class="loading-ajax" style="position:fixed;z-index:99999;background-color:yellow;color:black;width:100x;top:0px;left:50%;padding:8px;border-radius:5px;display:none;">Loading...</div>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

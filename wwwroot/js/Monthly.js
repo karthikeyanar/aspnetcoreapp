@@ -113,7 +113,11 @@ $(function () {
     console.log('dt=',dt);
     $fromDate.datepicker('setDate', (new Date(dt.toString())));
 
-    $("#chkIsBookMarkCategory").click(function () {
+    /* $("#chkIsBookMarkCategory").click(function () {
+        $tbl.flexReload2();
+    }); */
+   
+    $("#chkIsBookMark").click(function () {
         $tbl.flexReload2();
     });
 
@@ -122,10 +126,11 @@ $(function () {
         useBoxStyle: false,
         url: apiUrl("/Report/Monthly"),
         rpOptions: [10, 20, 30, 40, 50, 100, 200],
-        rp: 10,
+        rp: 50,
         onSubmit: function (p) {
             p.params = [];
-            p.params.push({ 'name': 'IsBookMarkCategory', 'value': $('#chkIsBookMarkCategory')[0].checked });
+            p.params.push({ 'name': 'IsBookMark', 'value': $('#chkIsBookMark')[0].checked });
+            //p.params.push({ 'name': 'IsBookMarkCategory', 'value': $('#chkIsBookMarkCategory')[0].checked });
             p.params.push({ 'name': 'FromDate', 'value': $(":input[name='FromDate']").val() });
         },
         onSuccess: function (t, g) { },
@@ -153,7 +158,7 @@ $(function () {
         },
         resizeWidth: true,
         method: "GET",
-        sortname: "his.prevpercentage",
+        sortname: "his.percentage",
         sortorder: "desc",
         autoload: true,
         height: 0,

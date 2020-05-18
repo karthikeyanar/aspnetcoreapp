@@ -159,7 +159,7 @@ namespace aspnetcoreapp.Repository
             List<SqlParameter> sqlParameterCollection = new List<SqlParameter>();
             PropertyInfo[] properties = model.GetType().GetProperties();
             SqlParameter sqlp = null;
-            List<String> ignoreProperties = new List<string>() { "LastTradingDate" };
+            List<String> ignoreProperties = new List<string>() { "LastTradingDate","MarketCapital" };
             foreach (var p in properties)
             {
                 if (ignoreProperties.Contains(p.Name) == false)
